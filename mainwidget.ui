@@ -13,8 +13,8 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
       <number>2</number>
@@ -77,7 +77,7 @@
       </layout>
      </widget>
      <widget class="QWidget" name="registration">
-      <layout class="QVBoxLayout" name="verticalLayout_5">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
@@ -149,6 +149,103 @@
             <widget class="QLineEdit" name="m_repasswordLineEdit"/>
            </item>
           </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetDefaultConstraint</enum>
+         </property>
+         <item>
+          <widget class="QGroupBox" name="m_sexGroupBox">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>100</height>
+            </size>
+           </property>
+           <property name="title">
+            <string>Sex:</string>
+           </property>
+           <widget class="QRadioButton" name="m_maleRadioButton">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>20</y>
+              <width>69</width>
+              <height>18</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Male</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="m_femaleRadioButton">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>50</y>
+              <width>100</width>
+              <height>18</height>
+             </rect>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Female</string>
+            </property>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="m_isAdminCheckBox">
+           <property name="text">
+            <string>Admin</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <item>
+          <widget class="QLabel" name="m_daylabel">
+           <property name="text">
+            <string>Day:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_monthlabel">
+           <property name="text">
+            <string>Month:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_yearlabel">
+           <property name="text">
+            <string>Year:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="QComboBox" name="m_daycombobox"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="m_monthcomboBox"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="m_yearcomboBox"/>
          </item>
         </layout>
        </item>
