@@ -66,8 +66,8 @@ void MainWidget::on_m_registerButton_clicked()
         QUrl url= QUrl("http://127.0.0.1:8000/");
         QByteArray postData;
 
-        query.addQueryItem("firstName", ui->m_firstNameLineEdit->text());
-        query.addQueryItem("lastName",ui->m_lastNameLineEdit->text());
+        query.addQueryItem("first_name", ui->m_firstNameLineEdit->text());
+        query.addQueryItem("last_name",ui->m_lastNameLineEdit->text());
         query.addQueryItem("email",ui->m_emailRegistrationLineEdit->text());
         query.addQueryItem("password",ui->m_passwordLineEditRegistration->text());
         if(ui->m_femaleRadioButton->isChecked()){
