@@ -35,7 +35,6 @@ void MainWidget::selectPage(int index)
 void MainWidget::initialize()
 {
     m_networkManager=new QNetworkAccessManager(this);
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(RequestResponse(QNetworkReply*)));
     for (int i = 1; i < 32; ++i) {
         ui->m_daycombobox->addItem(QString::number(i));
     }
@@ -61,6 +60,7 @@ void MainWidget::on_m_signupButton_clicked()
 
 void MainWidget::on_m_registerButton_clicked()
 {
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(RequestResponse(QNetworkReply*)));
     if(ui->m_passwordLineEditRegistration->text()==ui->m_repasswordLineEdit->text() && ui->m_firstNameLineEdit->text()!="" && ui->m_lastNameLineEdit->text()!="" && ui->m_emailRegistrationLineEdit->text()!="" && ui->m_passwordLineEditRegistration->text()!="" && ui->m_repasswordLineEdit->text()!=""){
         QUrlQuery query;
         QUrl url= QUrl("http://127.0.0.1:8000/");
@@ -96,5 +96,26 @@ void MainWidget::on_m_registerButton_clicked()
 void MainWidget::RequestResponse(QNetworkReply *reply)
 {
     QMessageBox::warning(this, "message", QString(reply->readAll()));
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(RequestResponse(QNetworkReply*)));
+}
+
+
+void MainWidget::on_m_loginButton_clicked()
+{
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LoginResponse(QNetworkReply*)));
+    QUrlQuery query;
+    QUrl url= QUrl("http://127.0.0.1:8000/login/");
+    QByteArray postData;
+    query.addQueryItem("email",ui->m_emailLineEdit->text());
+    query.addQueryItem("password",ui->m_passwordLineEdit->text());
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+    m_networkManager->post(networkRequest, postData);
+}
+
+void MainWidget::LoginResponse(QNetworkReply *reply)
+{
+    QMessageBox::warning(this, "message", QString(reply->readAll()));
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LoginResponse(QNetworkReply*)));
 }
 

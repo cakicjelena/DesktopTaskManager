@@ -43,6 +43,11 @@ private slots:
     void RequestResponse(
         QNetworkReply *reply); ///< Slot called when request is finished
 
+    void on_m_loginButton_clicked();
+
+    void LoginResponse(
+        QNetworkReply *reply); ///< Slot called when login is finished
+
 private:
     Ui::MainWidget *ui;
 };
