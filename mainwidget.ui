@@ -258,6 +258,87 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="profile">
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QLabel" name="m_first_name_label">
+           <property name="text">
+            <string>First name:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_last_name_label">
+           <property name="text">
+            <string>Last name:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_email_label">
+           <property name="text">
+            <string>Email:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_sexLabel">
+           <property name="text">
+            <string>Sex:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_birthDate_label">
+           <property name="text">
+            <string>BirthDate:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_admin_label">
+           <property name="text">
+            <string>Admin:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_active_label">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 255, 127);</string>
+           </property>
+           <property name="text">
+            <string>Active:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_tasks_button">
+         <property name="text">
+          <string>Task list</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_editProfilebutton">
+         <property name="text">
+          <string>Edit profile</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="m_logout_button">
+         <property name="text">
+          <string>Log out</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

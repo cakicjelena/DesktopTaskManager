@@ -12,14 +12,19 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwidget.cpp \
+    sidemenu.cpp \
+    usermodel.cpp \
     window.cpp
 
 HEADERS += \
     mainwidget.h \
+    sidemenu.h \
+    usermodel.h \
     window.h
 
 FORMS += \
     mainwidget.ui \
+    sidemenu.ui \
     window.ui
 
 TRANSLATIONS += \
