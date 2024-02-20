@@ -9,6 +9,7 @@
 #include "QJsonObject"
 #include "QJsonDocument"
 #include "usermodel.h"
+#include "QNetworkCookieJar"
 
 
 MainWidget::MainWidget(QWidget *parent)
@@ -27,7 +28,7 @@ MainWidget::~MainWidget()
 
 void MainWidget::selectPage(int index)
 {
-    if(index<0 || index>=4){
+    if(index<0 || index>=5){
         return;
     }
     else{
@@ -208,6 +209,38 @@ void MainWidget::on_m_tasks_button_clicked()
 
 void MainWidget::on_m_editProfilebutton_clicked()
 {
+    selectPage((int)pages::EDITPROFILE);
+}
+
+
+void MainWidget::on_m_submitbutton_clicked()
+{
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(EditProfileResponse(QNetworkReply*)));
+    QUrlQuery query;
+    QUrl url= QUrl("http://127.0.0.1:8000/editprofile/"+QString::number(m_user->getId()));
+    QByteArray postData;
+
+    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    if(ui->m_editpasswordlineedit->text()==ui->m_editpasswordconfirmlineedit->text()){
+
+    query.addQueryItem("first_name", ui->m_editfirstnamelineedit->text());
+    query.addQueryItem("last_name",ui->m_editlastnamelineedit->text());
+    query.addQueryItem("email",ui->m_editemaillineedit->text());
+    query.addQueryItem("password",ui->m_editpasswordlineedit->text());
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+    m_networkManager->post(networkRequest, postData);
+    }
+    else{
+        QMessageBox::warning(this,"Unmatched passwords!","Unmatched passwords!");
+    }
 
 }
+
+void MainWidget::EditProfileResponse(QNetworkReply *reply)
+{
+    qDebug()<<reply->readAll();
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(EditProfileResponse(QNetworkReply*)));
+}
+
 

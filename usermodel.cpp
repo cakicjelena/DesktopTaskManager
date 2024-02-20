@@ -80,6 +80,16 @@ void UserModel::setEmail(const QString &newEmail)
     email = newEmail;
 }
 
+int UserModel::getId() const
+{
+    return id;
+}
+
+void UserModel::setId(int newId)
+{
+    id = newId;
+}
+
 UserModel::UserModel() {}
 
 UserModel::~UserModel()
@@ -89,6 +99,7 @@ UserModel::~UserModel()
 
 UserModel::UserModel(QJsonObject& obj)
 {
+    id= obj.take("id").toInt();
     first_name = obj.take("first_name").toString();
     last_name= obj.take("last_name").toString();
     email=obj.take("email").toString();
@@ -99,8 +110,9 @@ UserModel::UserModel(QJsonObject& obj)
     is_superuser=obj.take("is_superuser").toBool();
 }
 
-UserModel::UserModel(QString first_name, QString last_name, QString email, QString password, bool sex, QDate birthDate, bool is_active, bool is_superuser)
+UserModel::UserModel(int id, QString first_name, QString last_name, QString email, QString password, bool sex, QDate birthDate, bool is_active, bool is_superuser)
 {
+    id=id;
     first_name=first_name;
     last_name=last_name;
     email=email;

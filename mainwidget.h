@@ -12,7 +12,8 @@ enum class pages{
     MAIN = 0,
     LOGIN= 1,
     REGISTRATION = 2,
-    PROFILE= 3
+    PROFILE= 3,
+    EDITPROFILE=4
 };
 
 namespace Ui {
@@ -55,11 +56,15 @@ private slots:
     void LogoutResponse(
         QNetworkReply *reply); ///< Slot called when logout is finished
 
+    void EditProfileResponse(
+        QNetworkReply *reply); ///< Slot called when edit profile is finished
     void on_m_logout_button_clicked();
 
     void on_m_tasks_button_clicked();
 
     void on_m_editProfilebutton_clicked();
+
+    void on_m_submitbutton_clicked();
 
 private:
     Ui::MainWidget *ui;
