@@ -10,6 +10,8 @@
 #include "QJsonDocument"
 #include "usermodel.h"
 #include "QNetworkCookieJar"
+#include "QJsonArray"
+#include "projectmodel.h"
 
 
 MainWidget::MainWidget(QWidget *parent)
@@ -28,7 +30,7 @@ MainWidget::~MainWidget()
 
 void MainWidget::selectPage(int index)
 {
-    if(index<0 || index>=5){
+    if(index<0 || index>=6){
         return;
     }
     else{
@@ -84,6 +86,17 @@ void MainWidget::initProfile()
     }
 }
 
+void MainWidget::clearProfile()
+{
+    ui->m_first_name_label->setText("First name: ");
+    ui->m_last_name_label->setText("Last name: ");
+    ui->m_email_label->setText("Email: ");
+    ui->m_sexLabel->setText("Sex: ");
+    ui->m_active_label->setText("Active: ");
+    ui->m_birthDate_label->setText("Birthdate: ");
+    ui->m_admin_label->setText("Admin: ");
+}
+
 void MainWidget::on_m_loginButton_2_clicked()
 {
     selectPage((int) pages::LOGIN);
@@ -134,6 +147,7 @@ void MainWidget::on_m_registerButton_clicked()
 void MainWidget::RequestResponse(QNetworkReply *reply)
 {
     QMessageBox::warning(this, "message", QString(reply->readAll()));
+    selectPage((int)pages::LOGIN);
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(RequestResponse(QNetworkReply*)));
 }
 
@@ -185,6 +199,8 @@ void MainWidget::LoginResponse(QNetworkReply *reply)
 void MainWidget::LogoutResponse(QNetworkReply *reply)
 {
     qDebug()<<reply->readAll();
+    clearProfile();
+    selectPage((int)pages::MAIN);
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
 }
 
@@ -194,18 +210,12 @@ void MainWidget::on_m_logout_button_clicked()
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
     QUrlQuery query;
     QUrl url= QUrl("http://127.0.0.1:8000/logout/");
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     QByteArray postData;
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
     m_networkManager->post(networkRequest, postData);
 }
-
-
-void MainWidget::on_m_tasks_button_clicked()
-{
-
-}
-
 
 void MainWidget::on_m_editProfilebutton_clicked()
 {
@@ -220,7 +230,7 @@ void MainWidget::on_m_submitbutton_clicked()
     QUrl url= QUrl("http://127.0.0.1:8000/editprofile/"+QString::number(m_user->getId()));
     QByteArray postData;
 
-    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     if(ui->m_editpasswordlineedit->text()==ui->m_editpasswordconfirmlineedit->text()){
 
     query.addQueryItem("first_name", ui->m_editfirstnamelineedit->text());
@@ -240,7 +250,55 @@ void MainWidget::on_m_submitbutton_clicked()
 void MainWidget::EditProfileResponse(QNetworkReply *reply)
 {
     qDebug()<<reply->readAll();
+    if(ui->m_editfirstnamelineedit->text()!=""){
+        m_user->setFirst_name(ui->m_editfirstnamelineedit->text());
+    }
+    if(ui->m_editlastnamelineedit->text()!=""){
+        m_user->setLast_name(ui->m_editlastnamelineedit->text());
+    }
+    if(ui->m_editemaillineedit->text()!=""){
+        m_user->setEmail(ui->m_editemaillineedit->text());
+    }
+    if(ui->m_editpasswordlineedit->text()!=""){
+        m_user->setPassword(ui->m_editpasswordlineedit->text());
+    }
+    clearProfile();
+    initProfile();
+    selectPage((int)pages::PROFILE);
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(EditProfileResponse(QNetworkReply*)));
 }
 
+void MainWidget::ProjectResponse(QNetworkReply *reply)
+{
+    qDebug()<<QString(reply->readAll());
+    QJsonArray obj;
+    obj = QJsonArray::fromStringList(QString(reply->readAll()).split('\n'));
+    QJsonDocument doc= QJsonDocument::fromJson("[{\"id\":3,\"name\":\"SearchInfo\",\"createDate\":\"2024-02-21\",\"deadlineDate\":\"2024-05-21\",\"description\":\"System for searching documents\",\"projectManagerId\":1},{\"id\":4,\"name\":\"TaskManager\",\"createDate\":\"2024-02-21\",\"deadlineDate\":\"2024-06-21\",\"description\":\"System for task validation\",\"projectManagerId\":10}]");
+    if(doc.isArray())
+        qDebug()<<"yea";
+    // check validity of the document
+
+            for (int i = 0; i < obj.size(); ++i) {
+                //ui->m_projectslistWidget->addItem(new QListWidgetItem(obj[i].toString()));
+                QJsonObject c= obj[i].toObject();
+                ProjectModel model(c);
+                qDebug()<<model.getName();
+            }
+
+    selectPage((int)pages::PROJECT);
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
+}
+
+
+
+void MainWidget::on_m_projects_button_clicked()
+{
+
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
+    QUrl url= QUrl("http://127.0.0.1:8000/getallprojects/");
+    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QNetworkRequest networkRequest(url);
+    m_networkManager->get(networkRequest);
+
+}
 

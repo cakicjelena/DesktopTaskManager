@@ -13,7 +13,8 @@ enum class pages{
     LOGIN= 1,
     REGISTRATION = 2,
     PROFILE= 3,
-    EDITPROFILE=4
+    EDITPROFILE=4,
+    PROJECT=5
 };
 
 namespace Ui {
@@ -38,6 +39,7 @@ protected:
     ///
     void initialize();
     void initProfile();
+    void clearProfile();
 
 private slots:
     void on_m_loginButton_2_clicked();
@@ -58,13 +60,16 @@ private slots:
 
     void EditProfileResponse(
         QNetworkReply *reply); ///< Slot called when edit profile is finished
-    void on_m_logout_button_clicked();
 
-    void on_m_tasks_button_clicked();
+    void ProjectResponse(
+        QNetworkReply *reply); ///< Slot called when project is finished
+    void on_m_logout_button_clicked();
 
     void on_m_editProfilebutton_clicked();
 
     void on_m_submitbutton_clicked();
+
+    void on_m_projects_button_clicked();
 
 private:
     Ui::MainWidget *ui;

@@ -63,7 +63,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="m_passwordLineEdit"/>
+          <widget class="QLineEdit" name="m_passwordLineEdit">
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -132,7 +136,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="m_passwordLineEditRegistration"/>
+            <widget class="QLineEdit" name="m_passwordLineEditRegistration">
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -146,7 +154,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="m_repasswordLineEdit"/>
+            <widget class="QLineEdit" name="m_repasswordLineEdit">
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -317,9 +329,9 @@
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="m_tasks_button">
+        <widget class="QPushButton" name="m_projects_button">
          <property name="text">
-          <string>Task list</string>
+          <string>Projects</string>
          </property>
         </widget>
        </item>
@@ -419,6 +431,18 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="projects">
+      <widget class="QListWidget" name="m_projectslistWidget">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>10</y>
+         <width>256</width>
+         <height>192</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

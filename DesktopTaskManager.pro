@@ -12,13 +12,17 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwidget.cpp \
+    projectmodel.cpp \
     sidemenu.cpp \
+    taskmodel.cpp \
     usermodel.cpp \
     window.cpp
 
 HEADERS += \
     mainwidget.h \
+    projectmodel.h \
     sidemenu.h \
+    taskmodel.h \
     usermodel.h \
     window.h
 
