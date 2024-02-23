@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>336</height>
+    <width>341</width>
+    <height>344</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
@@ -433,16 +433,302 @@
       </layout>
      </widget>
      <widget class="QWidget" name="projects">
-      <widget class="QListWidget" name="m_projectslistWidget">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>10</y>
-         <width>256</width>
-         <height>192</height>
-        </rect>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="QListWidget" name="m_projectslistWidget"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
+           <item>
+            <widget class="QPushButton" name="m_editprojectbutton">
+             <property name="text">
+              <string>EDIT PROJECT</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_deleteprojectbutton">
+             <property name="text">
+              <string>DELETE PROJECT</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_createprojectbutton">
+             <property name="text">
+              <string>CREATE PROJECT</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="projectCreate">
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_10">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="m_createProjectNameLabel">
+             <property name="text">
+              <string>Name: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_projectcreateNameLineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_21">
+           <item>
+            <widget class="QLabel" name="m_createProjectDescriptionLabel">
+             <property name="text">
+              <string>Description: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="m_projectCreateDescriptionText"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_createProjectCreateDateLabel">
+           <property name="text">
+            <string>Create date: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_20">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>470</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="m_createProjectDeadlineDateLabel">
+             <property name="text">
+              <string>Deadline date: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateEdit" name="m_projectcreateDateEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_22">
+           <item>
+            <widget class="QLabel" name="m_createProjectProjectManagerLabel">
+             <property name="text">
+              <string>Project manager: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_projectcreateProjectManagerLineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_createProjectSubmitButton">
+           <property name="text">
+            <string>SUBMIT</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tasks">
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_19">
+         <item>
+          <widget class="QListWidget" name="m_tasklistdoneWidget"/>
+         </item>
+         <item>
+          <widget class="QListWidget" name="m_tasklistinprogresWidget"/>
+         </item>
+         <item>
+          <widget class="QListWidget" name="m_tasklistWidget"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_17">
+         <item>
+          <widget class="QPushButton" name="m_deletetaskbutton">
+           <property name="text">
+            <string>DELETE TASK</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_edittaskbutton">
+           <property name="text">
+            <string>EDIT TASK</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_createtaskbutton">
+           <property name="text">
+            <string>CREATE TASK</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="taskDetails">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_23">
+           <item>
+            <widget class="QLabel" name="m_taskdetailsNameLabel">
+             <property name="text">
+              <string>Name: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_taskdetailsNameLineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_24">
+           <item>
+            <widget class="QLabel" name="m_taskdetailsTypeLabel">
+             <property name="text">
+              <string>Type: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_taskdetailsTypeLineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_26">
+           <item>
+            <widget class="QLabel" name="m_taskdetailsStatusLabel">
+             <property name="text">
+              <string>Status: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_taskdetailsStatusLineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="m_taskdetailsStartDateLabel">
+           <property name="text">
+            <string>Start date: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_27">
+           <property name="rightMargin">
+            <number>470</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="m_taskdetailsFinishdateLabel">
+             <property name="text">
+              <string>Finish date: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateEdit" name="m_taskdetailsFinishdateEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_28">
+           <item>
+            <widget class="QLabel" name="m_taskdetailsProjectIdLabel">
+             <property name="text">
+              <string>Project: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_taskdetailsProjectlineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_29">
+           <item>
+            <widget class="QLabel" name="m_taskdetailsUserIdLabel">
+             <property name="text">
+              <string>User: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="m_taskdetailsUserlineEdit"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_25">
+           <item>
+            <widget class="QLabel" name="m_taskdetailsDescriptionLabel">
+             <property name="text">
+              <string>Description: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="m_taskdetailsDescriptionTextEdit"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="m_taskdetailsCommentpushButton">
+         <property name="text">
+          <string>LEAVE COMMENT</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="m_taskdetailsSubmitpushButton">
+         <property name="text">
+          <string>SUBMIT</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

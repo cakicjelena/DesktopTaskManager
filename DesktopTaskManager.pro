@@ -10,21 +10,38 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    json_reader.cpp \
+    json_value.cpp \
+    json_writer.cpp \
     main.cpp \
     mainwidget.cpp \
     projectmodel.cpp \
     sidemenu.cpp \
     taskmodel.cpp \
+    tmfactory.cpp \
     usermodel.cpp \
     window.cpp
 
 HEADERS += \
+    allocator.h \
+    assertions.h \
+    config.h \
+    forwards.h \
+    json.h \
+    json_features.h \
+    json_tool.h \
+    json_valueiterator.inl \
     mainwidget.h \
     projectmodel.h \
+    reader.h \
     sidemenu.h \
     taskmodel.h \
+    tmfactory.h \
     usermodel.h \
-    window.h
+    value.h \
+    version.h \
+    window.h \
+    writer.h
 
 FORMS += \
     mainwidget.ui \
