@@ -3,7 +3,23 @@
 #include "projectmodel.h"
 #include "taskmodel.h"
 #include "usermodel.h"
+#include "commentmodel.h"
 
+
+QVector<ProjectModel *> TMFactory::projectsList() const
+{
+    return m_projectsList;
+}
+
+QVector<TaskModel *> TMFactory::tasksList() const
+{
+    return m_tasksList;
+}
+
+QVector<UserModel *> TMFactory::usersList() const
+{
+    return m_usersList;
+}
 
 TMFactory::TMFactory() {}
 
@@ -34,6 +50,16 @@ ProjectModel *TMFactory::getProjectById(int id)
 {
     foreach (ProjectModel* p, m_projectsList) {
         if(p->getId()==id){
+            return p;
+        }
+    }
+    return nullptr;
+}
+
+ProjectModel *TMFactory::getProjectByName(QString name)
+{
+    foreach (ProjectModel* p, m_projectsList) {
+        if(p->getName()==name){
             return p;
         }
     }
@@ -115,6 +141,17 @@ UserModel *TMFactory::getUserById(int id)
     return nullptr;
 }
 
+UserModel *TMFactory::getUserByEmail(QString email)
+{
+    foreach (UserModel* u, m_usersList) {
+        if(u->getEmail()==email){
+            return u;
+        }
+    }
+    return nullptr;
+}
+
+
 void TMFactory::addUser(UserModel *u)
 {
     if(!ifUserExist(u)){
@@ -134,6 +171,46 @@ bool TMFactory::ifUserExist(UserModel *u)
 {
     foreach (UserModel* us, m_usersList) {
         if(us->getId()==u->getId()){
+            return true;
+        }
+        return false;
+    }
+}
+
+CommentModel *TMFactory::createComment(QJsonObject object)
+{
+    return new CommentModel(object);
+}
+
+CommentModel *TMFactory::getCommentById(int id)
+{
+    foreach (CommentModel* c, m_commentsList) {
+        if(c->getId()==id){
+            return c;
+        }
+    }
+    return nullptr;
+}
+
+void TMFactory::addComment(CommentModel *c)
+{
+    if(!ifCommentExist(c)){
+        m_commentsList.append(c);
+    }
+}
+
+void TMFactory::deleteComment(CommentModel *c)
+{
+    if(ifCommentExist(c)){
+        m_commentsList.removeOne(c);
+    }
+    delete c;
+}
+
+bool TMFactory::ifCommentExist(CommentModel *c)
+{
+    foreach (CommentModel* cm, m_commentsList) {
+        if(cm->getId()==c->getId()){
             return true;
         }
         return false;

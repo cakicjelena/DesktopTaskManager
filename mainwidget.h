@@ -19,8 +19,21 @@ enum class pages{
     PROJECT=5,
     CREATEPROJECT=6,
     TASK=7,
-    TASKDETAILS=8
+    TASKDETAILS=8,
+    TASKCREATE=9
 
+};
+
+enum class taskStatus{
+    TODO=1,
+    INPROGRESS=2,
+    FINISHED=3
+};
+
+enum class taskType{
+    ORDINARY=1,
+    BUG=2,
+    URGENT=3
 };
 
 namespace Ui {
@@ -49,7 +62,7 @@ protected:
     void clearProfile();
     void taskDetails(int id);
     void getAllUsers();
-
+    void initTasks();
 private slots:
     void on_m_loginButton_2_clicked();
 
@@ -77,7 +90,17 @@ private slots:
         QNetworkReply *reply); ///< Slot called when task is finished
 
     void getAllUsersResponse(
-        QNetworkReply *reply); ///< Slot called when getting all users is finished
+        QNetworkReply *reply); ///< Slot called when getting all users is finished  
+
+    void createTaskResponse(
+        QNetworkReply *reply); ///< Slot called when creating task is finished
+    void deleteTaskResponse(
+        QNetworkReply *reply); ///< Slot called when deleting task is finished
+
+    void deleteProjectResponse(
+        QNetworkReply *reply); ///< Slot called when deleting project is finished
+    void createProjectResponse(
+        QNetworkReply *reply); ///< Slot called when creating project is finished
 
     void on_m_logout_button_clicked();
 
@@ -101,11 +124,23 @@ private slots:
 
     void on_m_createtaskbutton_clicked();
 
-    void on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item);
+    void on_m_createProjectSubmitButton_clicked();
+
+    void on_m_taskCreatepushButton_clicked();
+
+    void on_m_tasklisttodoWidget_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_m_tasklistinprogresWidget_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_m_tasklistdoneWidget_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_m_tasklisttodoWidget_itemClicked(QListWidgetItem *item);
 
     void on_m_tasklistinprogresWidget_itemClicked(QListWidgetItem *item);
 
-    void on_m_tasklistWidget_itemClicked(QListWidgetItem *item);
+    void on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item);
+
+    void on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item);
 
 private:
     Ui::MainWidget *ui;
