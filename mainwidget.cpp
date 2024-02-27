@@ -15,6 +15,8 @@
 #include "tmfactory.h"
 #include "taskmodel.h"
 #include "session.h"
+#include "commentmodel.h"
+#include "qtablewidget.h"
 
 
 MainWidget::MainWidget(QWidget *parent)
@@ -34,15 +36,13 @@ MainWidget::~MainWidget()
 
 void MainWidget::selectPage(int index)
 {
-    if(index<0 || index>=10){
+    if(index<0 || index>=11){
         return;
     }
     else{
         ui->stackedWidget->setCurrentIndex(index);
     }
 }
-
-
 
 void MainWidget::initialize()
 {
@@ -124,7 +124,17 @@ void MainWidget::taskDetails(int id)
     }
     UserModel* u= m_tmFactory->getUserById(t->getUserId());
     if(u){
-        ui->m_taskdetailsUserlineEdit->setText(u->getEmail());
+        ui->m_taskdetailsUsercomboBox->setCurrentText(u->getEmail());
+    }
+    ui->m_taskdetailsTypeLineEdit->setEnabled(false);
+    ui->m_taskdetailsStatusLineEdit->setEnabled(false);
+    ui->m_taskdetailsProjectlineEdit->setEnabled(false);
+    QVector<CommentModel*> comments= m_tmFactory->getAllCommentsOfTask(id);
+    ui->m_taskdetailsCommentslistWidget->clear();
+    foreach (CommentModel* c, comments) {
+        QListWidgetItem *newItem = new QListWidgetItem(c->getEmail()+ ":" +c->getComment());
+        ui->m_taskdetailsCommentslistWidget->addItem(newItem);
+
     }
     selectPage((int)pages::TASKDETAILS);
 
@@ -156,8 +166,18 @@ void MainWidget::initTasks()
     foreach(UserModel* u, m_tmFactory->usersList()){
         ui->m_taskCreateUsercomboBox->addItem(u->getEmail());
         ui->m_projectcreatecomboBox->addItem(u->getEmail());
+        ui->m_taskdetailsUsercomboBox->addItem(u->getEmail());
     }
 
+}
+
+void MainWidget::initComments()
+{
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getAllCommentsResponse(QNetworkReply*)));
+    QUrl url= QUrl("http://127.0.0.1:8000/getallcomments/");
+    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QNetworkRequest networkRequest(url);
+    m_networkManager->get(networkRequest);
 }
 
 void MainWidget::on_m_loginButton_2_clicked()
@@ -165,12 +185,10 @@ void MainWidget::on_m_loginButton_2_clicked()
     selectPage((int) pages::LOGIN);
 }
 
-
 void MainWidget::on_m_signupButton_clicked()
 {
     selectPage((int)pages::REGISTRATION);
 }
-
 
 void MainWidget::on_m_registerButton_clicked()
 {
@@ -213,7 +231,6 @@ void MainWidget::RequestResponse(QNetworkReply *reply)
     selectPage((int)pages::LOGIN);
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(RequestResponse(QNetworkReply*)));
 }
-
 
 void MainWidget::on_m_loginButton_clicked()
 {
@@ -269,7 +286,6 @@ void MainWidget::LogoutResponse(QNetworkReply *reply)
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
 }
 
-
 void MainWidget::on_m_logout_button_clicked()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
@@ -286,7 +302,6 @@ void MainWidget::on_m_editProfilebutton_clicked()
 {
     selectPage((int)pages::EDITPROFILE);
 }
-
 
 void MainWidget::on_m_submitbutton_clicked()
 {
@@ -351,10 +366,10 @@ void MainWidget::ProjectResponse(QNetworkReply *reply)
             ui->m_projectslistWidget->addItem(item);
         }
     initTasks();
+    initComments();
     selectPage((int)pages::PROJECT);
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
 }
-
 
 void MainWidget::on_m_projects_button_clicked()
 {
@@ -367,10 +382,15 @@ void MainWidget::on_m_projects_button_clicked()
 
 }
 
-
 void MainWidget::on_m_projectslistWidget_itemClicked(QListWidgetItem *item)
 {
-
+    QStringList projectId = item->text().split(":");
+    QString id= projectId[0];
+    ProjectModel* p = m_tmFactory->getProjectById(id.toInt());
+    if(p)
+    {
+        Session::getInstance()->setProject(p);
+    }
 }
 
 void MainWidget::TaskResponse(QNetworkReply *reply)
@@ -428,16 +448,25 @@ void MainWidget::getAllUsersResponse(QNetworkReply *reply)
 
 }
 
-
-
-
-
-
 void MainWidget::on_m_editprojectbutton_clicked()
 {
-
+    ui->m_projectcreateEditpushButton->setEnabled(true);
+    ui->m_createProjectSubmitButton->setVisible(false);
+    ProjectModel* p=Session::getInstance()->project();
+    if(p)
+    {
+        ui->m_projectcreateNameLineEdit->setText(p->getName());
+        ui->m_projectCreateDescriptionText->setPlainText(p->getDescription());
+        ui->m_createProjectCreateDateLabel->setText(ui->m_createProjectCreateDateLabel->text() + p->getCreateDate().toString());
+        ui->m_projectcreateDateEdit->setDate(p->getDeadlineDate());
+        UserModel* u= m_tmFactory->getUserById(p->getProjectManagerId());
+        if(u){
+            ui->m_projectcreatecomboBox->setCurrentText(u->getEmail());
+        }
+    }
+    ui->m_projectcreateNameLineEdit->setEnabled(false);
+    selectPage((int)pages::CREATEPROJECT);
 }
-
 
 void MainWidget::on_m_deleteprojectbutton_clicked()
 {
@@ -449,13 +478,13 @@ void MainWidget::on_m_deleteprojectbutton_clicked()
     m_networkManager->deleteResource(networkRequest);
 }
 
-
 void MainWidget::on_m_createprojectbutton_clicked()
 {
+    ui->m_createProjectSubmitButton->setEnabled(true);
+    ui->m_projectcreateEditpushButton->setVisible(false);
     ui->m_createProjectCreateDateLabel->setText("Start date:" + QDate::currentDate().toString());
     selectPage((int)pages::CREATEPROJECT);
 }
-
 
 void MainWidget::on_m_deletetaskbutton_clicked()
 {
@@ -467,22 +496,11 @@ void MainWidget::on_m_deletetaskbutton_clicked()
     m_networkManager->deleteResource(networkRequest);
 }
 
-
-void MainWidget::on_m_edittaskbutton_clicked()
-{
-
-}
-
-
 void MainWidget::on_m_createtaskbutton_clicked()
 {
     ui->m_taskCreateStartDateLabel_2->setText("Start date:" + QDate::currentDate().toString());
     selectPage((int)pages::TASKCREATE);
 }
-
-
-
-
 
 void MainWidget::on_m_createProjectSubmitButton_clicked()
 {
@@ -513,7 +531,6 @@ void MainWidget::on_m_createProjectSubmitButton_clicked()
         QMessageBox::warning(this,"Invalid input!", "Invalid input!");
     }
 }
-
 
 void MainWidget::on_m_taskCreatepushButton_clicked()
 {
@@ -596,7 +613,7 @@ void MainWidget::createTaskResponse(QNetworkReply *reply)
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(createTaskResponse(QNetworkReply*)));
     }
 
-    void MainWidget::deleteTaskResponse(QNetworkReply *reply)
+void MainWidget::deleteTaskResponse(QNetworkReply *reply)
     {
         TaskModel* t= Session::getInstance()->task();
         if(t->getStatus()==(int)taskStatus::TODO && !ui->m_tasklisttodoWidget->selectedItems().empty())
@@ -609,14 +626,29 @@ void MainWidget::createTaskResponse(QNetworkReply *reply)
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(deleteTaskResponse(QNetworkReply*)));
     }
 
-    void MainWidget::deleteProjectResponse(QNetworkReply *reply)
+void MainWidget::editTaskResponse(QNetworkReply *reply)
+    {
+        QMessageBox::warning(this, "Task edited", QString(reply->readAll()));
+        TaskModel* t= Session::getInstance()->task();
+        t->setName(ui->m_taskdetailsNameLineEdit->text());
+        t->setDescription(ui->m_taskdetailsDescriptionTextEdit->toPlainText());
+        t->setFinishDate(ui->m_taskdetailsFinishdateEdit->date());
+        UserModel* u= m_tmFactory->getUserByEmail(ui->m_taskdetailsUsercomboBox->currentText());
+        if(u){
+            t->setUserId(u->getId());
+        }
+        disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editTaskResponse(QNetworkReply*)));
+        selectPage((int)pages::TASK);
+    }
+
+void MainWidget::deleteProjectResponse(QNetworkReply *reply)
     {
         if(ui->m_projectslistWidget->selectedItems().size()>0)
             delete ui->m_projectslistWidget->selectedItems().first();
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(deleteProjectResponse(QNetworkReply*)));
     }
 
-    void MainWidget::createProjectResponse(QNetworkReply *reply)
+void MainWidget::createProjectResponse(QNetworkReply *reply)
     {
         QString response= reply->readAll();
         QJsonObject obj;
@@ -646,11 +678,40 @@ void MainWidget::createTaskResponse(QNetworkReply *reply)
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(createProjectResponse(QNetworkReply*)));
     }
 
+    }
+
+void MainWidget::editProjectResponse(QNetworkReply *reply)
+{
+    QMessageBox::warning(this, "Project changed!", QString(reply->readAll()));
+    ProjectModel* p= Session::getInstance()->project();
+    p->setDescription(ui->m_projectCreateDescriptionText->toPlainText());
+    p->setDeadlineDate(ui->m_projectcreateDateEdit->date());
+    UserModel* u= m_tmFactory->getUserByEmail(ui->m_projectcreatecomboBox->currentText());
+    if(u){
+        p->setProjectManagerId(u->getId());
+    }
+    selectPage((int)pages::PROJECT);
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editProjectResponse(QNetworkReply*)));
 }
 
+void MainWidget::getAllCommentsResponse(QNetworkReply *reply)
+{
+    QString response  = QString(reply->readAll());
+    qDebug()<<response;
+    QJsonArray obj;
 
+    QJsonDocument doc= QJsonDocument::fromJson(response.toUtf8());
+    obj = doc.array();
+    // check validity of the document
 
+    for (int i = 0; i < obj.size(); ++i) {
+        CommentModel* c = m_tmFactory->createComment(obj[i].toObject());
+        qDebug()<<c->getComment();
+        m_tmFactory->addComment(c);
+    }
 
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getAllCommentsResponse(QNetworkReply*)));
+}
 
 void MainWidget::on_m_tasklisttodoWidget_itemDoubleClicked(QListWidgetItem *item)
 {
@@ -659,7 +720,6 @@ void MainWidget::on_m_tasklisttodoWidget_itemDoubleClicked(QListWidgetItem *item
     taskDetails(id.toInt());
 }
 
-
 void MainWidget::on_m_tasklistinprogresWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     QStringList taskId = item->text().split(":");
@@ -667,14 +727,12 @@ void MainWidget::on_m_tasklistinprogresWidget_itemDoubleClicked(QListWidgetItem 
     taskDetails(id.toInt());
 }
 
-
 void MainWidget::on_m_tasklistdoneWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     QStringList taskId = item->text().split(":");
     QString id= taskId[0];
     taskDetails(id.toInt());
 }
-
 
 void MainWidget::on_m_tasklisttodoWidget_itemClicked(QListWidgetItem *item)
 {
@@ -689,7 +747,6 @@ void MainWidget::on_m_tasklisttodoWidget_itemClicked(QListWidgetItem *item)
     //ui->m_tasklisttodoWidget->clearSelection();
 }
 
-
 void MainWidget::on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item)
 {
     QStringList taskId = item->text().split(":");
@@ -703,7 +760,6 @@ void MainWidget::on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item)
     //ui->m_tasklisttodoWidget->clearSelection();
 }
 
-
 void MainWidget::on_m_tasklistinprogresWidget_itemClicked(QListWidgetItem *item)
 {
     QStringList taskId = item->text().split(":");
@@ -716,7 +772,6 @@ void MainWidget::on_m_tasklistinprogresWidget_itemClicked(QListWidgetItem *item)
     //ui->m_tasklistinprogresWidget->clearSelection();
     //ui->m_tasklisttodoWidget->clearSelection();
 }
-
 
 void MainWidget::on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item)
 {
@@ -732,5 +787,84 @@ void MainWidget::on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item
     QNetworkRequest networkRequest(url);
     m_networkManager->get(networkRequest);
 
+}
+
+void MainWidget::on_m_taskdetailsSubmitpushButton_clicked()
+{
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    int id= Session::getInstance()->task()->getId();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editTaskResponse(QNetworkReply*)));
+    QUrlQuery query;
+    QUrl url= QUrl("http://127.0.0.1:8000/edittask/"+QString::number(id));
+    QByteArray postData;
+    query.addQueryItem("name", ui->m_taskdetailsNameLineEdit->text());
+    query.addQueryItem("description",ui->m_taskdetailsDescriptionTextEdit->toPlainText());
+    query.addQueryItem("finishDate",QString::number(ui->m_taskdetailsFinishdateEdit->date().year())+"-"+QString::number(ui->m_taskdetailsFinishdateEdit->date().month())+"-"+QString::number(ui->m_taskdetailsFinishdateEdit->date().day()));
+    UserModel* u= m_tmFactory->getUserByEmail(ui->m_taskdetailsUsercomboBox->currentText());
+    if(u){
+        query.addQueryItem("userId",QString::number( u->getId()));
+    }
+    else{
+        query.addQueryItem("userId", "");
+    }
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+    m_networkManager->post(networkRequest, postData);
+}
+
+void MainWidget::on_m_projectdetailsPushbutton_clicked()
+{
+    ui->m_createProjectSubmitButton->setEnabled(false);
+    ui->m_projectcreateEditpushButton->setEnabled(false);
+    ProjectModel* p=Session::getInstance()->project();
+    if(p)
+    {
+        ui->m_projectcreateNameLineEdit->setText(p->getName());
+        ui->m_projectCreateDescriptionText->setPlainText(p->getDescription());
+        //ui->m_taskdetailsStatusLineEdit->setText(QString::number(t->getStatus()));
+        ui->m_createProjectCreateDateLabel->setText("Create date: " + p->getCreateDate().toString());
+        ui->m_projectcreateDateEdit->setDate(p->getDeadlineDate());
+        UserModel* u= m_tmFactory->getUserById(p->getProjectManagerId());
+        if(u){
+            ui->m_projectcreatecomboBox->setCurrentText(u->getEmail());
+        }
+    }
+    selectPage((int)pages::CREATEPROJECT);
+}
+
+void MainWidget::on_m_projectcreateEditpushButton_clicked()
+{
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editProjectResponse(QNetworkReply*)));
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QUrlQuery query;
+    int id= Session::getInstance()->project()->getId();
+    QUrl url= QUrl("http://127.0.0.1:8000/editproject/"+QString::number(id));
+    QByteArray postData;
+    query.addQueryItem("description",ui->m_projectCreateDescriptionText->toPlainText());
+    query.addQueryItem("deadlineDate",QString::number(ui->m_projectcreateDateEdit->date().year())+"-"+QString::number(ui->m_projectcreateDateEdit->date().month())+"-"+QString::number(ui->m_projectcreateDateEdit->date().day()));
+    UserModel* u= m_tmFactory->getUserByEmail(ui->m_projectcreatecomboBox->currentText());
+    if(u){
+        query.addQueryItem("projectManagerId", QString::number(u->getId()));
+    }
+    else{
+            query.addQueryItem("projectManagerId", "");
+    }
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+        //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    m_networkManager->post(networkRequest, postData);
+
+}
+
+
+void MainWidget::on_m_commentSubmitpushButton_clicked()
+{
+
+}
+
+
+void MainWidget::on_m_taskdetailsCommentpushButton_clicked()
+{
+    selectPage((int)pages::COMMENT);
 }
 

@@ -37,6 +37,7 @@ public:
     bool ifUserExist(UserModel* u);
     CommentModel* createComment(QJsonObject object);
     CommentModel* getCommentById(int id);
+    QVector<CommentModel*> getAllCommentsOfTask(int taskId);
     void addComment(CommentModel* c);
     void deleteComment(CommentModel* c);
     bool ifCommentExist(CommentModel* c);

@@ -462,6 +462,13 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="m_projectdetailsPushbutton">
+             <property name="text">
+              <string>PROJECT DETAILS</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -550,7 +557,14 @@
          <item>
           <widget class="QPushButton" name="m_createProjectSubmitButton">
            <property name="text">
-            <string>SUBMIT</string>
+            <string>CREATE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_projectcreateEditpushButton">
+           <property name="text">
+            <string>EDIT</string>
            </property>
           </widget>
          </item>
@@ -601,23 +615,16 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_17">
          <item>
-          <widget class="QPushButton" name="m_deletetaskbutton">
-           <property name="text">
-            <string>DELETE TASK</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="m_edittaskbutton">
-           <property name="text">
-            <string>EDIT TASK</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="m_createtaskbutton">
            <property name="text">
             <string>CREATE TASK</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="m_deletetaskbutton">
+           <property name="text">
+            <string>DELETE TASK</string>
            </property>
           </widget>
          </item>
@@ -719,7 +726,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="m_taskdetailsUserlineEdit"/>
+            <widget class="QComboBox" name="m_taskdetailsUsercomboBox"/>
            </item>
           </layout>
          </item>
@@ -739,19 +746,22 @@
          </item>
         </layout>
        </item>
-       <item row="1" column="0">
+       <item row="3" column="0">
+        <widget class="QPushButton" name="m_taskdetailsSubmitpushButton">
+         <property name="text">
+          <string>SUBMIT</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
         <widget class="QPushButton" name="m_taskdetailsCommentpushButton">
          <property name="text">
           <string>LEAVE COMMENT</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="m_taskdetailsSubmitpushButton">
-         <property name="text">
-          <string>SUBMIT</string>
-         </property>
-        </widget>
+       <item row="1" column="0">
+        <widget class="QListWidget" name="m_taskdetailsCommentslistWidget"/>
        </item>
       </layout>
      </widget>
@@ -873,6 +883,20 @@
         <widget class="QPushButton" name="m_taskCreatepushButton">
          <property name="text">
           <string>CREATE</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="comment">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QPlainTextEdit" name="m_commentplainTextEdit"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="m_commentSubmitpushButton">
+         <property name="text">
+          <string>SUBMIT</string>
          </property>
         </widget>
        </item>

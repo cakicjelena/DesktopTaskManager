@@ -112,8 +112,8 @@ bool TMFactory::ifProjectExist(ProjectModel *p)
         if(pr->getId()==p->getId()){
             return true;
         }
-        return false;
     }
+    return false;
 }
 
 bool TMFactory::ifTaskExist(TaskModel *t)
@@ -122,8 +122,8 @@ bool TMFactory::ifTaskExist(TaskModel *t)
         if(ta->getId()==t->getId()){
             return true;
         }
-        return false;
     }
+    return false;
 }
 
 UserModel *TMFactory::createUser(QJsonObject object)
@@ -173,8 +173,8 @@ bool TMFactory::ifUserExist(UserModel *u)
         if(us->getId()==u->getId()){
             return true;
         }
-        return false;
     }
+     return false;
 }
 
 CommentModel *TMFactory::createComment(QJsonObject object)
@@ -190,6 +190,18 @@ CommentModel *TMFactory::getCommentById(int id)
         }
     }
     return nullptr;
+}
+
+QVector<CommentModel*> TMFactory::getAllCommentsOfTask(int taskId)
+{
+    QVector<CommentModel*> result;
+    foreach (CommentModel* c, m_commentsList) {
+        if(c->getTaskId()==taskId){
+            result.append(c);
+        }
+
+    }
+    return result;
 }
 
 void TMFactory::addComment(CommentModel *c)
@@ -213,7 +225,8 @@ bool TMFactory::ifCommentExist(CommentModel *c)
         if(cm->getId()==c->getId()){
             return true;
         }
-        return false;
+
     }
+    return false;
 }
 

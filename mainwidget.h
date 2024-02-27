@@ -20,7 +20,8 @@ enum class pages{
     CREATEPROJECT=6,
     TASK=7,
     TASKDETAILS=8,
-    TASKCREATE=9
+    TASKCREATE=9,
+    COMMENT=10
 
 };
 
@@ -63,6 +64,7 @@ protected:
     void taskDetails(int id);
     void getAllUsers();
     void initTasks();
+    void initComments();
 private slots:
     void on_m_loginButton_2_clicked();
 
@@ -97,10 +99,16 @@ private slots:
     void deleteTaskResponse(
         QNetworkReply *reply); ///< Slot called when deleting task is finished
 
+    void editTaskResponse(
+        QNetworkReply *reply); ///< Slot called when editing task is finished
     void deleteProjectResponse(
         QNetworkReply *reply); ///< Slot called when deleting project is finished
     void createProjectResponse(
         QNetworkReply *reply); ///< Slot called when creating project is finished
+    void editProjectResponse(
+        QNetworkReply *reply); ///< Slot called when editing project is finished
+    void getAllCommentsResponse(
+        QNetworkReply *reply); ///< Slot called when getting comments is finished
 
     void on_m_logout_button_clicked();
 
@@ -141,6 +149,16 @@ private slots:
     void on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item);
 
     void on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_m_taskdetailsSubmitpushButton_clicked();
+
+    void on_m_projectdetailsPushbutton_clicked();
+
+    void on_m_projectcreateEditpushButton_clicked();
+
+    void on_m_commentSubmitpushButton_clicked();
+
+    void on_m_taskdetailsCommentpushButton_clicked();
 
 private:
     Ui::MainWidget *ui;
