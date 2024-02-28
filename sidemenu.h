@@ -4,6 +4,7 @@
 
 #include <QWidget>
 enum class pages;
+#define LOG_OUT 45
 namespace Ui {
 class SideMenu;
 }
@@ -12,6 +13,7 @@ class SideMenu : public QWidget
 {
     Q_OBJECT
 protected:
+    const QSize m_size=QSize(100,100);
     QButtonGroup m_menuItems;
 protected:
     void initialize();
@@ -21,6 +23,12 @@ public:
 
 private:
     Ui::SideMenu *ui;
+
+protected slots:
+    void menuItemClicked(int id);
+
+signals:
+    void menuItem(int id);
 };
 
 #endif // SIDEMENU_H

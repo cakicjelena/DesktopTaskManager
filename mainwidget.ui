@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>344</height>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -316,16 +316,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QLabel" name="m_active_label">
-           <property name="styleSheet">
-            <string notr="true">background-color: rgb(255, 255, 127);</string>
-           </property>
-           <property name="text">
-            <string>Active:</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>
@@ -600,17 +590,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_19">
-         <item>
-          <widget class="QListWidget" name="m_tasklisttodoWidget"/>
-         </item>
-         <item>
-          <widget class="QListWidget" name="m_tasklistinprogresWidget"/>
-         </item>
-         <item>
-          <widget class="QListWidget" name="m_tasklistdoneWidget"/>
-         </item>
-        </layout>
+        <layout class="QHBoxLayout" name="horizontalLayout_19"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_17">

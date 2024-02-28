@@ -1,5 +1,6 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
+#include "window.h"
 
 #include <QWidget>
 
@@ -8,6 +9,7 @@ class QNetworkReply;
 class UserModel;
 class TMFactory;
 class QListWidgetItem;
+class TaskList;
 
 
 enum class pages{
@@ -44,10 +46,14 @@ class MainWidget;
 class MainWidget : public QWidget
 {
     Q_OBJECT
+    friend class Window;
 protected:
     QNetworkAccessManager* m_networkManager;
     TMFactory* m_tmFactory;
     UserModel* m_user;
+    TaskList* m_listToDo;
+    TaskList* m_listInProgress;
+    TaskList* m_listDone;
 
 public:
     explicit MainWidget(QWidget *parent = nullptr);
@@ -60,12 +66,18 @@ protected:
     ///
     void initialize();
     void initProfile();
+    void logOut();
     void clearProfile();
     void taskDetails(int id);
     void getAllUsers();
     void initTasks();
     void initComments();
+    void projects();
+    void chooseMenuItem(int id);
+
 private slots:
+    void itemDoubleClicked(QListWidgetItem *item);
+    void itemClicked(QListWidgetItem *item);
     void on_m_loginButton_2_clicked();
 
     void on_m_signupButton_clicked();
@@ -110,6 +122,9 @@ private slots:
     void getAllCommentsResponse(
         QNetworkReply *reply); ///< Slot called when getting comments is finished
 
+    void addCommentResponse(
+        QNetworkReply *reply); ///< Slot called when adding comment is finished
+
     void on_m_logout_button_clicked();
 
     void on_m_editProfilebutton_clicked();
@@ -128,25 +143,11 @@ private slots:
 
     void on_m_deletetaskbutton_clicked();
 
-    void on_m_edittaskbutton_clicked();
-
     void on_m_createtaskbutton_clicked();
 
     void on_m_createProjectSubmitButton_clicked();
 
     void on_m_taskCreatepushButton_clicked();
-
-    void on_m_tasklisttodoWidget_itemDoubleClicked(QListWidgetItem *item);
-
-    void on_m_tasklistinprogresWidget_itemDoubleClicked(QListWidgetItem *item);
-
-    void on_m_tasklistdoneWidget_itemDoubleClicked(QListWidgetItem *item);
-
-    void on_m_tasklisttodoWidget_itemClicked(QListWidgetItem *item);
-
-    void on_m_tasklistinprogresWidget_itemClicked(QListWidgetItem *item);
-
-    void on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item);
 
     void on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item);
 
@@ -159,7 +160,15 @@ private slots:
     void on_m_commentSubmitpushButton_clicked();
 
     void on_m_taskdetailsCommentpushButton_clicked();
+    void on_m_tasklisttodoWidget_itemEntered(QListWidgetItem *item);
 
+    void on_m_tasklistinprogresWidget_itemEntered(QListWidgetItem *item);
+
+    void on_m_tasklistdoneWidget_itemEntered(QListWidgetItem *item);
+
+
+signals:
+    void showSideBar();
 private:
     Ui::MainWidget *ui;
 };

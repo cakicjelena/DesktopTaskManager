@@ -16,6 +16,7 @@ SOURCES += \
     projectmodel.cpp \
     session.cpp \
     sidemenu.cpp \
+    tasklist.cpp \
     taskmodel.cpp \
     tmfactory.cpp \
     usermodel.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     projectmodel.h \
     session.h \
     sidemenu.h \
+    tasklist.h \
     taskmodel.h \
     tmfactory.h \
     usermodel.h \

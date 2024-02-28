@@ -26,6 +26,10 @@ protected:
     ///@brief Method for initialization
     ///
     void initialize();
+
+protected slots:
+    void sideBarShow();
+    void menuItemClicked(int id);
 private:
     Ui::Window *ui;
 };

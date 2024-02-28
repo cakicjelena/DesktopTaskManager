@@ -17,6 +17,7 @@
 #include "session.h"
 #include "commentmodel.h"
 #include "qtablewidget.h"
+#include "tasklist.h"
 
 
 MainWidget::MainWidget(QWidget *parent)
@@ -32,6 +33,9 @@ MainWidget::~MainWidget()
     delete ui;
     delete m_networkManager;
     delete m_tmFactory;
+    delete m_listDone;
+    delete m_listInProgress;
+    delete m_listToDo;
 }
 
 void MainWidget::selectPage(int index)
@@ -50,6 +54,33 @@ void MainWidget::initialize()
 
     m_tmFactory= new TMFactory();
     getAllUsers();
+
+    m_listToDo= new TaskList(this, taskStatus::TODO);
+    m_listInProgress= new TaskList(this, taskStatus::INPROGRESS);
+    m_listDone=new TaskList(this, taskStatus::FINISHED);
+    //m_listToDo->setTmFactory(m_tmFactory);
+    //m_listInProgress->setTmFactory(m_tmFactory);
+    //m_listDone->setTmFactory(m_tmFactory);
+    connect(m_listToDo, SIGNAL(customItemClicked(QListWidgetItem*)),this, SLOT(itemClicked(QListWidgetItem*)));
+    connect(m_listToDo, SIGNAL(customItemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(m_listInProgress, SIGNAL(customItemClicked(QListWidgetItem*)),this, SLOT(itemClicked(QListWidgetItem*)));
+    connect(m_listInProgress, SIGNAL(customItemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(m_listDone, SIGNAL(customItemClicked(QListWidgetItem*)),this, SLOT(itemClicked(QListWidgetItem*)));
+    connect(m_listDone, SIGNAL(customItemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+
+    ui->horizontalLayout_19->addWidget(m_listToDo);
+    ui->horizontalLayout_19->addWidget(m_listInProgress);
+    ui->horizontalLayout_19->addWidget(m_listDone);
+
+
+
+    // m_listToDo->setDragEnabled(true);
+    // m_listToDo->setAcceptDrops(true);
+    // m_listInProgress->setDragEnabled(true);
+    // m_listInProgress->setAcceptDrops(true);
+    // m_listDone->setDragEnabled(true);
+    // m_listDone->setAcceptDrops(true);
+
 
     for (int i = 1; i < 32; ++i) {
         ui->m_daycombobox->addItem(QString::number(i));
@@ -77,17 +108,7 @@ void MainWidget::initProfile()
         ui->m_sexLabel->setText(ui->m_sexLabel->text() + "F");
     }
     ui->m_birthDate_label->setText(ui->m_birthDate_label->text() + Session::getInstance()->user()->getBirthDate().toString());
-    if(Session::getInstance()->user()->getIs_active()){
 
-        ui->m_active_label->setText(ui->m_active_label->text() + "Active");
-        ui->m_active_label->setStyleSheet("background-color: rgb(144, 238, 144)");
-
-    }
-    else {
-        ui->m_active_label->setText(ui->m_active_label->text() + "Inactive");
-        ui->m_active_label->setStyleSheet("background-color: rgb(255, 127, 127)");
-
-    }
     if(Session::getInstance()->user()->getIs_superuser()){
         ui->m_admin_label->setText(ui->m_admin_label->text() + "Admin");
     }
@@ -97,13 +118,24 @@ void MainWidget::initProfile()
     }
 }
 
+void MainWidget::logOut()
+{
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
+    QUrlQuery query;
+    QUrl url= QUrl("http://127.0.0.1:8000/logout/");
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QByteArray postData;
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+    m_networkManager->post(networkRequest, postData);
+}
+
 void MainWidget::clearProfile()
 {
     ui->m_first_name_label->setText("First name: ");
     ui->m_last_name_label->setText("Last name: ");
     ui->m_email_label->setText("Email: ");
     ui->m_sexLabel->setText("Sex: ");
-    ui->m_active_label->setText("Active: ");
     ui->m_birthDate_label->setText("Birthdate: ");
     ui->m_admin_label->setText("Admin: ");
 }
@@ -178,6 +210,51 @@ void MainWidget::initComments()
     //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     QNetworkRequest networkRequest(url);
     m_networkManager->get(networkRequest);
+}
+
+void MainWidget::projects()
+{
+    if(m_tmFactory->projectsList().size()<=0){
+        connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
+        QUrl url= QUrl("http://127.0.0.1:8000/getallprojects/");
+        //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+        QNetworkRequest networkRequest(url);
+        m_networkManager->get(networkRequest);
+    }
+    selectPage((int)pages::PROJECT);
+}
+
+void MainWidget::chooseMenuItem(int id)
+{
+    switch (id) {
+    case ((int) pages::PROJECT):
+        projects();
+        break;
+    case ((int) pages::PROFILE):
+        selectPage(id);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWidget::itemDoubleClicked(QListWidgetItem *item)
+{
+    qDebug()<<"Hvata";
+    QStringList taskId = item->text().split(":");
+    QString id= taskId[0];
+    taskDetails(id.toInt());
+}
+
+void MainWidget::itemClicked(QListWidgetItem *item)
+{
+    QStringList taskId = item->text().split(":");
+    QString id= taskId[0];
+    TaskModel* t = m_tmFactory->getTaskById(id.toInt());
+    if(t)
+    {
+        Session::getInstance()->setTask(t);
+    }
 }
 
 void MainWidget::on_m_loginButton_2_clicked()
@@ -267,13 +344,11 @@ void MainWidget::LoginResponse(QNetworkReply *reply)
         qDebug() << "Invalid JSON...\n" << QString(reply->readAll()) << endl;
     }
 
-   //MessageBox::warning(this, "message", obj.take("first_name
-    //qDebug()<<obj.take("first_name");
-    //Session::getInstance()->user()= new UserModel(obj);
     Session::getInstance()->setUser(new UserModel(obj));
 
     initProfile();
     qDebug()<<Session::getInstance()->user()->getFirst_name();
+    emit showSideBar();
     selectPage((int)pages::PROFILE);
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LoginResponse(QNetworkReply*)));
 }
@@ -288,14 +363,7 @@ void MainWidget::LogoutResponse(QNetworkReply *reply)
 
 void MainWidget::on_m_logout_button_clicked()
 {
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
-    QUrlQuery query;
-    QUrl url= QUrl("http://127.0.0.1:8000/logout/");
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
-    QByteArray postData;
-    postData=query.toString(QUrl::FullyEncoded).toUtf8();
-    QNetworkRequest networkRequest(url);
-    m_networkManager->post(networkRequest, postData);
+   logOut();
 }
 
 void MainWidget::on_m_editProfilebutton_clicked()
@@ -374,11 +442,7 @@ void MainWidget::ProjectResponse(QNetworkReply *reply)
 void MainWidget::on_m_projects_button_clicked()
 {
 
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
-    QUrl url= QUrl("http://127.0.0.1:8000/getallprojects/");
-    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
-    QNetworkRequest networkRequest(url);
-    m_networkManager->get(networkRequest);
+    projects();
 
 }
 
@@ -402,7 +466,9 @@ void MainWidget::TaskResponse(QNetworkReply *reply)
     QJsonDocument doc= QJsonDocument::fromJson(response.toUtf8());
     obj = doc.array();
     // check validity of the document
-
+    m_listDone->clear();
+    m_listInProgress->clear();
+    m_listToDo->clear();
     for (int i = 0; i < obj.size(); ++i) {
         TaskModel* t = m_tmFactory->createTask(obj[i].toObject());
         qDebug()<<t->getName();
@@ -410,15 +476,15 @@ void MainWidget::TaskResponse(QNetworkReply *reply)
 
     if(t->getStatus()==(int)taskStatus::TODO)
     {
-        ui->m_tasklisttodoWidget->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
+        m_listToDo->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
     }
     if(t->getStatus()==(int)taskStatus::INPROGRESS)
     {
-        ui->m_tasklistinprogresWidget->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
+        m_listInProgress->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
     }
     if(t->getStatus()==(int)taskStatus::FINISHED)
     {
-        ui->m_tasklistdoneWidget->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
+        m_listDone->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
     }
 
     }
@@ -499,6 +565,8 @@ void MainWidget::on_m_deletetaskbutton_clicked()
 void MainWidget::on_m_createtaskbutton_clicked()
 {
     ui->m_taskCreateStartDateLabel_2->setText("Start date:" + QDate::currentDate().toString());
+    ui->m_taskCreateProjectcomboBox->setCurrentText(Session::getInstance()->project()->getName());
+    ui->m_taskCreateProjectcomboBox->setEnabled(false);
     selectPage((int)pages::TASKCREATE);
 }
 
@@ -598,15 +666,15 @@ void MainWidget::createTaskResponse(QNetworkReply *reply)
             m_tmFactory->addTask(t);
             if(t->getStatus()==(int)taskStatus::TODO)
             {
-                ui->m_tasklisttodoWidget->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
+                m_listToDo->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
             }
             if(t->getStatus()==(int)taskStatus::INPROGRESS)
             {
-                ui->m_tasklistinprogresWidget->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
+                m_listInProgress->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
             }
             if(t->getStatus()==(int)taskStatus::FINISHED)
             {
-                ui->m_tasklistdoneWidget->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
+                m_listDone->addItem(new QListWidgetItem(QString::number(t->getId())+":"+t->getName()));
             }
         }
         selectPage((int)pages::TASK);
@@ -616,12 +684,12 @@ void MainWidget::createTaskResponse(QNetworkReply *reply)
 void MainWidget::deleteTaskResponse(QNetworkReply *reply)
     {
         TaskModel* t= Session::getInstance()->task();
-        if(t->getStatus()==(int)taskStatus::TODO && !ui->m_tasklisttodoWidget->selectedItems().empty())
-            delete ui->m_tasklisttodoWidget->selectedItems().first();
-        if(t->getStatus()==(int)taskStatus::INPROGRESS && !ui->m_tasklistinprogresWidget->selectedItems().empty())
-            delete ui->m_tasklistinprogresWidget->selectedItems().first();
-        if(t->getStatus()==(int)taskStatus::FINISHED && !ui->m_tasklistdoneWidget->selectedItems().empty())
-            delete ui->m_tasklistdoneWidget->selectedItems().first();
+        if(t->getStatus()==(int)taskStatus::TODO && !m_listToDo->selectedItems().empty())
+            delete m_listToDo->selectedItems().first();
+        if(t->getStatus()==(int)taskStatus::INPROGRESS && !m_listInProgress->selectedItems().empty())
+            delete m_listInProgress->selectedItems().first();
+        if(t->getStatus()==(int)taskStatus::FINISHED && !m_listDone->selectedItems().empty())
+            delete m_listDone->selectedItems().first();
         Session::getInstance()->setTask(nullptr);
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(deleteTaskResponse(QNetworkReply*)));
     }
@@ -713,66 +781,38 @@ void MainWidget::getAllCommentsResponse(QNetworkReply *reply)
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getAllCommentsResponse(QNetworkReply*)));
 }
 
-void MainWidget::on_m_tasklisttodoWidget_itemDoubleClicked(QListWidgetItem *item)
+void MainWidget::addCommentResponse(QNetworkReply *reply)
 {
-    QStringList taskId = item->text().split(":");
-    QString id= taskId[0];
-    taskDetails(id.toInt());
-}
+    QMessageBox::warning(this, "Comment added", "Comment added");
+    QString response= reply->readAll();
+    QJsonObject obj;
+    QJsonDocument doc = QJsonDocument::fromJson(response.toUtf8());
 
-void MainWidget::on_m_tasklistinprogresWidget_itemDoubleClicked(QListWidgetItem *item)
-{
-    QStringList taskId = item->text().split(":");
-    QString id= taskId[0];
-    taskDetails(id.toInt());
-}
-
-void MainWidget::on_m_tasklistdoneWidget_itemDoubleClicked(QListWidgetItem *item)
-{
-    QStringList taskId = item->text().split(":");
-    QString id= taskId[0];
-    taskDetails(id.toInt());
-}
-
-void MainWidget::on_m_tasklisttodoWidget_itemClicked(QListWidgetItem *item)
-{
-    QStringList taskId = item->text().split(":");
-    QString id= taskId[0];
-    TaskModel* t = m_tmFactory->getTaskById(id.toInt());
-    if(t)
+    // check validity of the document
+    if(!doc.isNull())
     {
-        Session::getInstance()->setTask(t);
+        if(doc.isObject())
+        {
+            obj = doc.object();
+        }
+        else
+        {
+            qDebug() << "Document is not an object" << endl;
+        }
     }
-    //ui->m_tasklistinprogresWidget->clearSelection();
-    //ui->m_tasklisttodoWidget->clearSelection();
-}
-
-void MainWidget::on_m_tasklistdoneWidget_itemClicked(QListWidgetItem *item)
-{
-    QStringList taskId = item->text().split(":");
-    QString id= taskId[0];
-    TaskModel* t = m_tmFactory->getTaskById(id.toInt());
-    if(t)
+    else
     {
-        Session::getInstance()->setTask(t);
+        qDebug() << "Invalid JSON...\n" << QString(reply->readAll()) << endl;
     }
-    //ui->m_tasklistinprogresWidget->clearSelection();
-    //ui->m_tasklisttodoWidget->clearSelection();
-}
-
-void MainWidget::on_m_tasklistinprogresWidget_itemClicked(QListWidgetItem *item)
-{
-    QStringList taskId = item->text().split(":");
-    QString id= taskId[0];
-    TaskModel* t = m_tmFactory->getTaskById(id.toInt());
-    if(t)
-    {
-        Session::getInstance()->setTask(t);
+    CommentModel* c= m_tmFactory->createComment(obj);
+    if(c){
+        m_tmFactory->addComment(c);
+        qDebug()<<c->getComment();
+        ui->m_taskdetailsCommentslistWidget->addItem(new QListWidgetItem(c->getEmail()+":"+c->getComment()));
+        selectPage((int)pages::TASKDETAILS);
+        disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addCommentResponse(QNetworkReply*)));
     }
-    //ui->m_tasklistinprogresWidget->clearSelection();
-    //ui->m_tasklisttodoWidget->clearSelection();
 }
-
 void MainWidget::on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     QStringList projectId = item->text().split(":");
@@ -856,15 +896,42 @@ void MainWidget::on_m_projectcreateEditpushButton_clicked()
 
 }
 
-
 void MainWidget::on_m_commentSubmitpushButton_clicked()
 {
-
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addCommentResponse(QNetworkReply*)));
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QUrlQuery query;
+    int tid= Session::getInstance()->task()->getId();
+    int uid=Session::getInstance()->user()->getId();
+    QUrl url= QUrl("http://127.0.0.1:8000/createcommentontask/"+QString::number(uid)+"/"+QString::number(tid));
+    QByteArray postData;
+    query.addQueryItem("comment_on_task", ui->m_commentplainTextEdit->toPlainText());
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+    //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    m_networkManager->post(networkRequest, postData);
 }
-
 
 void MainWidget::on_m_taskdetailsCommentpushButton_clicked()
 {
     selectPage((int)pages::COMMENT);
+}
+
+
+void MainWidget::on_m_tasklisttodoWidget_itemEntered(QListWidgetItem *item)
+{
+    qDebug()<<"item to do entered";
+}
+
+
+void MainWidget::on_m_tasklistinprogresWidget_itemEntered(QListWidgetItem *item)
+{
+    qDebug()<<"item in progress entered";
+}
+
+
+void MainWidget::on_m_tasklistdoneWidget_itemEntered(QListWidgetItem *item)
+{
+    qDebug()<<"item done entered";
 }
 
