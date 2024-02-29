@@ -11,8 +11,8 @@ protected:
     int type; ///< type of task
     QString description; ///< task description
     int status; ///< status of task
-    QDate startDate; ///< start date
-    QDate finishDate; ///< finish date
+    QDate startDate; ///< start date of task
+    QDate finishDate; ///< finish date of task
     int projectId; ///< id of project where task is
     int userId; ///< id of user who works on task
 public:

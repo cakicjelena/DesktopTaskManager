@@ -10,13 +10,15 @@ class CommentModel;
 class TMFactory
 {
 protected:
-    QVector<ProjectModel*> m_projectsList;
-    QVector<TaskModel*> m_tasksList;
-    QVector<UserModel*> m_usersList;
-    QVector<CommentModel*> m_commentsList;
+    QVector<ProjectModel*> m_projectsList; ///<list of projects
+    QVector<TaskModel*> m_tasksList; ///< list of tasks
+    QVector<UserModel*> m_usersList; ///< list of users
+    QVector<CommentModel*> m_commentsList; /// list of comments
+
 public:
     TMFactory();
     virtual ~TMFactory();
+
 public:
     ProjectModel* createProject(QJsonObject object);
     TaskModel* createTask(QJsonObject object);

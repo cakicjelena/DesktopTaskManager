@@ -6,7 +6,7 @@ class QJsonObject;
 class UserModel
 {
 protected:
-    int id; ///< id
+   int id; ///< id
    QString first_name; ///< First name of user
    QString last_name; ///< Last name of user
    QString email; ///< User email

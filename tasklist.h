@@ -9,7 +9,7 @@ class TaskList : public QListWidget
 {
     Q_OBJECT
 protected:
-    taskStatus m_type;
+    taskStatus m_type; ///< type of status
     //TMFactory* m_tmFactory;
 
 public:
@@ -19,15 +19,20 @@ public:
     taskStatus type() const; ///< function that returns m_type
 
 protected:
+    ///@brief Method for task lists intialization
+    ///
     void initialize();
+
 protected slots:
     void listItemClicked(QListWidgetItem* item);
     void listItemDoubleClicked(QListWidgetItem* item);
     void itemDrag(QListWidgetItem* item);
+
 signals:
     void customItemClicked(QListWidgetItem*item);
     void customItemDoubleClicked(QListWidgetItem*item);
     void changeStatus(int task_status);
+
 protected:
     virtual void dropEvent(QDropEvent *event) override;
 };

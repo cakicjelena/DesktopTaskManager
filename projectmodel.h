@@ -12,6 +12,7 @@ protected:
     QDate deadlineDate; ///< Deadline date of project
     QString description; ///< Description of project
     int projectManagerId; ///< Who is manager on project
+
 public:
     ProjectModel();
     virtual ~ProjectModel();

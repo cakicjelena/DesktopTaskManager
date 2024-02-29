@@ -11,8 +11,6 @@ class TMFactory;
 class QListWidgetItem;
 class TaskList;
 
-
-
 enum class pages{
     MAIN = 0,
     LOGIN= 1,
@@ -52,11 +50,11 @@ class MainWidget : public QWidget
 protected:
     QNetworkAccessManager* m_networkManager;
     TMFactory* m_tmFactory;
-    UserModel* m_user;
-    TaskList* m_listToDo;
-    TaskList* m_listInProgress;
-    TaskList* m_listDone;
-    QByteArray csrftoken;
+    UserModel* m_user; ///< pionter to user
+    TaskList* m_listToDo; ///< pointer to list of tasks to do
+    TaskList* m_listInProgress; ///< pointer to list of tasks in progress
+    TaskList* m_listDone; ///< pointer to list of done tasks
+    QByteArray csrftoken; ///< csrf token
 
 public:
     explicit MainWidget(QWidget *parent = nullptr);
@@ -72,69 +70,46 @@ protected:
     ///@brief Method for initialization
     ///
     void initialize();
+    ///@brief Method for profile initialization
+    ///
     void initProfile();
+    ///@brief Method for logging out
+    ///
     void logOut();
+    ///@brief Method for clearing profile widget
+    ///
     void clearProfile();
+    ///@brief Method for showing task details
+    ///
     void taskDetails(int id);
+    ///@brief Method for getting all users
+    ///
     void getAllUsers();
+    /// @brief Method for task initialization
+    ///
     void initTasks();
+    ///@brief Method for comment initialization
+    ///
     void initComments();
+    ///@brief Method for getting all projects
+    ///
     void projects();
+    ///@brief Method for choosing item from sidemenu
+    ///
     void chooseMenuItem(int id);
 
 private slots:
     void itemDoubleClicked(QListWidgetItem *item);
+
     void itemClicked(QListWidgetItem *item);
+
+    void on_m_loginButton_clicked();
+
     void on_m_loginButton_2_clicked();
 
     void on_m_signupButton_clicked();
 
     void on_m_registerButton_clicked();
-
-    void RequestResponse(
-        QNetworkReply *reply); ///< Slot called when request is finished
-
-    void on_m_loginButton_clicked();
-
-    void LoginResponse(
-        QNetworkReply *reply); ///< Slot called when login is finished
-    void LogoutResponse(
-        QNetworkReply *reply); ///< Slot called when logout is finished
-
-    void EditProfileResponse(
-        QNetworkReply *reply); ///< Slot called when edit profile is finished
-
-    void ProjectResponse(
-        QNetworkReply *reply); ///< Slot called when project is finished
-
-    void TaskResponse(
-        QNetworkReply *reply); ///< Slot called when task is finished
-
-    void getAllUsersResponse(
-        QNetworkReply *reply); ///< Slot called when getting all users is finished  
-
-    void createTaskResponse(
-        QNetworkReply *reply); ///< Slot called when creating task is finished
-    void deleteTaskResponse(
-        QNetworkReply *reply); ///< Slot called when deleting task is finished
-
-    void editTaskResponse(
-        QNetworkReply *reply); ///< Slot called when editing task is finished
-    void deleteProjectResponse(
-        QNetworkReply *reply); ///< Slot called when deleting project is finished
-    void createProjectResponse(
-        QNetworkReply *reply); ///< Slot called when creating project is finished
-    void editProjectResponse(
-        QNetworkReply *reply); ///< Slot called when editing project is finished
-    void getAllCommentsResponse(
-        QNetworkReply *reply); ///< Slot called when getting comments is finished
-
-    void addCommentResponse(
-        QNetworkReply *reply); ///< Slot called when adding comment is finished
-    void changeStatusResponse(
-        QNetworkReply *reply); ///< Slot called when changing status of task is finished
-    void putUserOnProjectResponse(
-        QNetworkReply *reply); ///< Slot called when putting user on project is finished
 
     void on_m_logout_button_clicked();
 
@@ -171,19 +146,73 @@ private slots:
     void on_m_commentSubmitpushButton_clicked();
 
     void on_m_taskdetailsCommentpushButton_clicked();
+
     void on_m_tasklisttodoWidget_itemEntered(QListWidgetItem *item);
 
     void on_m_tasklistinprogresWidget_itemEntered(QListWidgetItem *item);
 
     void on_m_tasklistdoneWidget_itemEntered(QListWidgetItem *item);
+
     void changeStatusSlot(int task_status);
 
-        void on_m_putUserOnProjectSubmitpushButton_clicked();
+    void on_m_putUserOnProjectSubmitpushButton_clicked();
 
     void on_m_projectsPutUserOnProjectpushButton_clicked();
 
+    void RequestResponse(
+        QNetworkReply *reply); ///< Slot called when request is finished  
+
+    void LoginResponse(
+        QNetworkReply *reply); ///< Slot called when login is finished
+
+    void LogoutResponse(
+        QNetworkReply *reply); ///< Slot called when logout is finished
+
+    void EditProfileResponse(
+        QNetworkReply *reply); ///< Slot called when edit profile is finished
+
+    void ProjectResponse(
+        QNetworkReply *reply); ///< Slot called when project is finished
+
+    void TaskResponse(
+        QNetworkReply *reply); ///< Slot called when task is finished
+
+    void getAllUsersResponse(
+        QNetworkReply *reply); ///< Slot called when getting all users is finished  
+
+    void createTaskResponse(
+        QNetworkReply *reply); ///< Slot called when creating task is finished
+
+    void deleteTaskResponse(
+        QNetworkReply *reply); ///< Slot called when deleting task is finished
+
+    void editTaskResponse(
+        QNetworkReply *reply); ///< Slot called when editing task is finished
+
+    void deleteProjectResponse(
+        QNetworkReply *reply); ///< Slot called when deleting project is finished
+
+    void createProjectResponse(
+        QNetworkReply *reply); ///< Slot called when creating project is finished
+
+    void editProjectResponse(
+        QNetworkReply *reply); ///< Slot called when editing project is finished
+
+    void getAllCommentsResponse(
+        QNetworkReply *reply); ///< Slot called when getting comments is finished
+
+    void addCommentResponse(
+        QNetworkReply *reply); ///< Slot called when adding comment is finished
+
+    void changeStatusResponse(
+        QNetworkReply *reply); ///< Slot called when changing status of task is finished
+
+    void putUserOnProjectResponse(
+        QNetworkReply *reply); ///< Slot called when putting user on project is finished
+
 signals:
     void showSideBar();
+
 private:
     Ui::MainWidget *ui;
 };

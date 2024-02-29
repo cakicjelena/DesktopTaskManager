@@ -12,11 +12,16 @@ class SideMenu;
 class SideMenu : public QWidget
 {
     Q_OBJECT
+
 protected:
-    const QSize m_size=QSize(100,100);
+    const QSize m_size=QSize(100,100); ///<Button dimensions
     QButtonGroup m_menuItems;
+
 protected:
+    ///<@brief Method for sidemenu initialization
+    ///
     void initialize();
+
 public:
     explicit SideMenu(QWidget *parent = nullptr);
     ~SideMenu();

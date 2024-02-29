@@ -10,6 +10,7 @@ protected:
      ProjectModel* m_project;
      UserModel* m_user;
      TaskModel* m_task;
+
 public:
     static Session* getInstance();
     ProjectModel *project() const;

@@ -7,8 +7,9 @@ class CommentModel
 protected:
     int id; ///< id of comment
     int taskId; ///< id of task
-    QString email; ///< Email of user leaving comment
+    QString email; ///< Email of user who is leaving comment
     QString comment; ///< Comment
+
 public:
     virtual ~CommentModel();
     CommentModel(QJsonObject& obj);
