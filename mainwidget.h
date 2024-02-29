@@ -12,6 +12,7 @@ class QListWidgetItem;
 class TaskList;
 
 
+
 enum class pages{
     MAIN = 0,
     LOGIN= 1,
@@ -55,6 +56,7 @@ protected:
     TaskList* m_listToDo;
     TaskList* m_listInProgress;
     TaskList* m_listDone;
+    QByteArray csrftoken;
 
 public:
     explicit MainWidget(QWidget *parent = nullptr);
@@ -62,6 +64,10 @@ public:
     ///@brief Method for page selection
     ///
     void selectPage(int index);
+
+    QByteArray getCsrftoken() const;
+    void setCsrftoken(const QByteArray &newCsrftoken);
+
 protected:
     ///@brief Method for initialization
     ///

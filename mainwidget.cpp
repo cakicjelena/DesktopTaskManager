@@ -18,8 +18,21 @@
 #include "commentmodel.h"
 #include "qtablewidget.h"
 #include "tasklist.h"
+#include "QNetworkCookie"
 
 int tStatus=-1;
+
+
+
+QByteArray MainWidget::getCsrftoken() const
+{
+    return csrftoken;
+}
+
+void MainWidget::setCsrftoken(const QByteArray &newCsrftoken)
+{
+    csrftoken = newCsrftoken;
+}
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
@@ -54,7 +67,7 @@ void MainWidget::initialize()
     m_networkManager=new QNetworkAccessManager(this);
 
     m_tmFactory= new TMFactory();
-    getAllUsers();
+
 
     m_listToDo= new TaskList(this, taskStatus::TODO);
     m_listInProgress= new TaskList(this, taskStatus::INPROGRESS);
@@ -127,10 +140,13 @@ void MainWidget::logOut()
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(LogoutResponse(QNetworkReply*)));
     QUrlQuery query;
     QUrl url= QUrl("http://127.0.0.1:8000/logout/");
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
+
     QByteArray postData;
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
     m_networkManager->post(networkRequest, postData);
 }
 
@@ -180,8 +196,10 @@ void MainWidget::getAllUsers()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getAllUsersResponse(QNetworkReply*)));
     QUrl url= QUrl("http://127.0.0.1:8000/getallusers/");
-    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
     m_networkManager->get(networkRequest);
 }
 
@@ -211,8 +229,10 @@ void MainWidget::initComments()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(getAllCommentsResponse(QNetworkReply*)));
     QUrl url= QUrl("http://127.0.0.1:8000/getallcomments/");
-    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
     m_networkManager->get(networkRequest);
 }
 
@@ -229,8 +249,10 @@ void MainWidget::projects()
         else{
             url=QUrl("http://127.0.0.1:8000/getallprojectsofuser/"+ QString::number(u->getId()));
         }
-        //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
         QNetworkRequest networkRequest(url);
+        networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+        networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
         m_networkManager->get(networkRequest);
     }
     qDebug()<<u->getId();
@@ -339,6 +361,13 @@ void MainWidget::on_m_loginButton_clicked()
 
 void MainWidget::LoginResponse(QNetworkReply *reply)
 {
+    QList<QNetworkCookie> listOfCookies= m_networkManager->cookieJar()->cookiesForUrl(QUrl("http://127.0.0.1:8000/login/"));
+    foreach (QNetworkCookie c, listOfCookies) {
+        if(c.name()=="csrftoken"){
+            setCsrftoken(c.value());
+        }
+
+    }
     QJsonObject obj;
     QJsonDocument doc = QJsonDocument::fromJson(QString(reply->readAll()).toUtf8());
 
@@ -362,6 +391,7 @@ void MainWidget::LoginResponse(QNetworkReply *reply)
     Session::getInstance()->setUser(new UserModel(obj));
 
     initProfile();
+    getAllUsers();
     qDebug()<<Session::getInstance()->user()->getFirst_name();
     emit showSideBar();
     selectPage((int)pages::PROFILE);
@@ -393,7 +423,7 @@ void MainWidget::on_m_submitbutton_clicked()
     QUrl url= QUrl("http://127.0.0.1:8000/editprofile/"+QString::number(Session::getInstance()->user()->getId()));
     QByteArray postData;
 
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
     if(ui->m_editpasswordlineedit->text()==ui->m_editpasswordconfirmlineedit->text()){
 
     query.addQueryItem("first_name", ui->m_editfirstnamelineedit->text());
@@ -402,6 +432,8 @@ void MainWidget::on_m_submitbutton_clicked()
     query.addQueryItem("password",ui->m_editpasswordlineedit->text());
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
     m_networkManager->post(networkRequest, postData);
     }
     else{
@@ -521,7 +553,7 @@ void MainWidget::getAllUsersResponse(QNetworkReply *reply)
 
     for (int i = 0; i < obj.size(); ++i) {
         UserModel* u = m_tmFactory->createUser(obj[i].toObject());
-        //qDebug()<<u->getName();
+        qDebug()<<u->getEmail();
         m_tmFactory->addUser(u);
         ui->m_putUserOnProjectUserscomboBox->addItem(u->getEmail());
     }
@@ -553,11 +585,13 @@ void MainWidget::on_m_editprojectbutton_clicked()
 
 void MainWidget::on_m_deleteprojectbutton_clicked()
 {
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
     QStringList projectId = ui->m_projectslistWidget->selectedItems().first()->text().split(":");
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(deleteProjectResponse(QNetworkReply*)));
     QUrl url= QUrl("http://127.0.0.1:8000/deleteproject/"+projectId[0]);
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
     m_networkManager->deleteResource(networkRequest);
 }
 
@@ -571,11 +605,13 @@ void MainWidget::on_m_createprojectbutton_clicked()
 
 void MainWidget::on_m_deletetaskbutton_clicked()
 {
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
     int id= Session::getInstance()->task()->getId();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(deleteTaskResponse(QNetworkReply*)));
     QUrl url= QUrl("http://127.0.0.1:8000/deletetask/"+QString::number(id));
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
     m_networkManager->deleteResource(networkRequest);
 }
 
@@ -590,7 +626,7 @@ void MainWidget::on_m_createtaskbutton_clicked()
 void MainWidget::on_m_createProjectSubmitButton_clicked()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(createProjectResponse(QNetworkReply*)));
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+
     if(ui->m_projectcreateNameLineEdit->text()!="" && ui->m_projectCreateDescriptionText->toPlainText()!="" && ui->m_projectcreateDateEdit->date()>QDate::currentDate()){
         QUrlQuery query;
         QUrl url= QUrl("http://127.0.0.1:8000/createproject/");
@@ -609,6 +645,8 @@ void MainWidget::on_m_createProjectSubmitButton_clicked()
         }
         postData=query.toString(QUrl::FullyEncoded).toUtf8();
         QNetworkRequest networkRequest(url);
+        networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+        networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
         //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         m_networkManager->post(networkRequest, postData);
     }
@@ -620,7 +658,6 @@ void MainWidget::on_m_createProjectSubmitButton_clicked()
 void MainWidget::on_m_taskCreatepushButton_clicked()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(createTaskResponse(QNetworkReply*)));
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     if(ui->m_taskCreateNameLineEdit_2->text()!="" && ui->m_taskCreateDescriptionTextEdit_2->toPlainText()!="" && ui->m_taskCreateFinishdateEdit_2->date()>QDate::currentDate()){
         QUrlQuery query;
         QUrl url= QUrl("http://127.0.0.1:8000/createtask/");
@@ -648,6 +685,9 @@ void MainWidget::on_m_taskCreatepushButton_clicked()
         }
         postData=query.toString(QUrl::FullyEncoded).toUtf8();
         QNetworkRequest networkRequest(url);
+        networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+        networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
         //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         m_networkManager->post(networkRequest, postData);
     }
@@ -879,15 +919,16 @@ void MainWidget::on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item
     }
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(TaskResponse(QNetworkReply*)));
     QUrl url= QUrl("http://127.0.0.1:8000/getalltasksofproject/"+projectId[0]);
-    //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
     m_networkManager->get(networkRequest);
 
 }
 
 void MainWidget::on_m_taskdetailsSubmitpushButton_clicked()
 {
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     int id= Session::getInstance()->task()->getId();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editTaskResponse(QNetworkReply*)));
     QUrlQuery query;
@@ -905,6 +946,9 @@ void MainWidget::on_m_taskdetailsSubmitpushButton_clicked()
     }
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
     m_networkManager->post(networkRequest, postData);
 }
 
@@ -931,7 +975,6 @@ void MainWidget::on_m_projectdetailsPushbutton_clicked()
 void MainWidget::on_m_projectcreateEditpushButton_clicked()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editProjectResponse(QNetworkReply*)));
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     QUrlQuery query;
     int id= Session::getInstance()->project()->getId();
     QUrl url= QUrl("http://127.0.0.1:8000/editproject/"+QString::number(id));
@@ -947,6 +990,9 @@ void MainWidget::on_m_projectcreateEditpushButton_clicked()
     }
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
         //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     m_networkManager->post(networkRequest, postData);
 
@@ -955,7 +1001,6 @@ void MainWidget::on_m_projectcreateEditpushButton_clicked()
 void MainWidget::on_m_commentSubmitpushButton_clicked()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addCommentResponse(QNetworkReply*)));
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     QUrlQuery query;
     int tid= Session::getInstance()->task()->getId();
     int uid=Session::getInstance()->user()->getId();
@@ -964,6 +1009,9 @@ void MainWidget::on_m_commentSubmitpushButton_clicked()
     query.addQueryItem("comment_on_task", ui->m_commentplainTextEdit->toPlainText());
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
     //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     m_networkManager->post(networkRequest, postData);
 }
@@ -995,8 +1043,7 @@ void MainWidget::changeStatusSlot(int task_status)
 {
     tStatus=task_status;
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(changeStatusResponse(QNetworkReply*)));
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
-    QUrlQuery query;
+     QUrlQuery query;
     int tid= Session::getInstance()->task()->getId();
     //qDebug()<<QString::number((int)type);
     QUrl url= QUrl("http://127.0.0.1:8000/changetaskstatus/"+QString::number(tid));
@@ -1004,6 +1051,9 @@ void MainWidget::changeStatusSlot(int task_status)
     query.addQueryItem("status",QString::number(task_status));
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
     //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     m_networkManager->post(networkRequest, postData);
 }
@@ -1016,10 +1066,12 @@ void MainWidget::on_m_putUserOnProjectSubmitpushButton_clicked()
     UserModel* u = m_tmFactory->getUserByEmail(email);
     QString uId= QString::number(u->getId());
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(putUserOnProjectResponse(QNetworkReply*)));
-    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
     QUrlQuery query;
     QUrl url= QUrl("http://127.0.0.1:8000/createuseronproject/"+uId+"/"+id);
     QNetworkRequest networkRequest(url);
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+
     QByteArray postData;
     m_networkManager->post(networkRequest, postData);
 }
