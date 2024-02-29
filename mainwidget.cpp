@@ -976,6 +976,7 @@ void MainWidget::on_m_projectcreateEditpushButton_clicked()
 {
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(editProjectResponse(QNetworkReply*)));
     QUrlQuery query;
+    m_networkManager->setCookieJar(new QNetworkCookieJar());
     int id= Session::getInstance()->project()->getId();
     QUrl url= QUrl("http://127.0.0.1:8000/editproject/"+QString::number(id));
     QByteArray postData;
@@ -990,8 +991,8 @@ void MainWidget::on_m_projectcreateEditpushButton_clicked()
     }
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
-    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
-    networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
+    //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
+    //networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
 
         //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     m_networkManager->post(networkRequest, postData);
