@@ -16,7 +16,7 @@ public:
     TaskList();
     TaskList(QWidget* parent, taskStatus type);
     virtual ~TaskList();
-    taskStatus type() const;
+    taskStatus type() const; ///< function that returns m_type
 
 protected:
     void initialize();
@@ -27,6 +27,7 @@ protected slots:
 signals:
     void customItemClicked(QListWidgetItem*item);
     void customItemDoubleClicked(QListWidgetItem*item);
+    void changeStatus(int task_status);
 protected:
     virtual void dropEvent(QDropEvent *event) override;
 };

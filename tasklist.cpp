@@ -27,11 +27,12 @@ void TaskList::initialize()
 {
     connect(this, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(listItemClicked(QListWidgetItem*)));
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(listItemDoubleClicked(QListWidgetItem*)));
-   // connect(this, SIGNAL(itemEntered(QListWidgetItem*)), this, SLOT(itemDrag(QListWidgetItem*)));
+    connect(this, SIGNAL(itemEntered(QListWidgetItem*)), this, SLOT(itemDrag(QListWidgetItem*)));
     //connect(this, SIGNAL(deleteDragItemSignal(QListWidgetItem*,taskStatus)), this, SLOT(deleteDragItem(QListWidgetItem*,taskStatus)));
     setDragEnabled(true);
     setAcceptDrops(true);
-    //setDragDropMode(QAbstractItemView::DragDrop);
+    setDragDropMode(QAbstractItemView::DragDrop);
+    setDefaultDropAction(Qt::MoveAction);
 
 
 }
@@ -51,15 +52,14 @@ void TaskList::listItemDoubleClicked(QListWidgetItem *item)
 void TaskList::itemDrag(QListWidgetItem *item)
 {
     qDebug()<<"Reaguje";
-
-    addItem(item);
+    //setItemHidden(item,true);
 }
 
 
 void TaskList::dropEvent(QDropEvent *event)
 {
     QListWidget::dropEvent(event);
-    // emit deleteDragItemSignal(currentItem(), m_type);
     qDebug()<<"Task moved";
+    emit changeStatus((int)m_type);
 
 }

@@ -19,6 +19,7 @@
 #include "qtablewidget.h"
 #include "tasklist.h"
 
+int tStatus=-1;
 
 MainWidget::MainWidget(QWidget *parent)
     : QWidget(parent)
@@ -40,7 +41,7 @@ MainWidget::~MainWidget()
 
 void MainWidget::selectPage(int index)
 {
-    if(index<0 || index>=11){
+    if(index<0 || index>=12){
         return;
     }
     else{
@@ -63,10 +64,13 @@ void MainWidget::initialize()
     //m_listDone->setTmFactory(m_tmFactory);
     connect(m_listToDo, SIGNAL(customItemClicked(QListWidgetItem*)),this, SLOT(itemClicked(QListWidgetItem*)));
     connect(m_listToDo, SIGNAL(customItemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(m_listToDo, SIGNAL(changeStatus(int)), this, SLOT(changeStatusSlot(int)));
     connect(m_listInProgress, SIGNAL(customItemClicked(QListWidgetItem*)),this, SLOT(itemClicked(QListWidgetItem*)));
     connect(m_listInProgress, SIGNAL(customItemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(m_listInProgress, SIGNAL(changeStatus(int)), this, SLOT(changeStatusSlot(int)));
     connect(m_listDone, SIGNAL(customItemClicked(QListWidgetItem*)),this, SLOT(itemClicked(QListWidgetItem*)));
     connect(m_listDone, SIGNAL(customItemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(m_listDone, SIGNAL(changeStatus(int)), this, SLOT(changeStatusSlot(int)));
 
     ui->horizontalLayout_19->addWidget(m_listToDo);
     ui->horizontalLayout_19->addWidget(m_listInProgress);
@@ -214,13 +218,22 @@ void MainWidget::initComments()
 
 void MainWidget::projects()
 {
+    QUrl url;
+    UserModel* u= Session::getInstance()->user();
+
     if(m_tmFactory->projectsList().size()<=0){
         connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
-        QUrl url= QUrl("http://127.0.0.1:8000/getallprojects/");
+        if(u->getIs_superuser()){
+            url= QUrl("http://127.0.0.1:8000/getallprojects/");
+        }
+        else{
+            url=QUrl("http://127.0.0.1:8000/getallprojectsofuser/"+ QString::number(u->getId()));
+        }
         //m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
         QNetworkRequest networkRequest(url);
         m_networkManager->get(networkRequest);
     }
+    qDebug()<<u->getId();
     selectPage((int)pages::PROJECT);
 }
 
@@ -248,6 +261,8 @@ void MainWidget::itemDoubleClicked(QListWidgetItem *item)
 
 void MainWidget::itemClicked(QListWidgetItem *item)
 {
+    qDebug()<<"taskclcked";
+
     QStringList taskId = item->text().split(":");
     QString id= taskId[0];
     TaskModel* t = m_tmFactory->getTaskById(id.toInt());
@@ -432,6 +447,7 @@ void MainWidget::ProjectResponse(QNetworkReply *reply)
             m_tmFactory->addProject(p);
             QListWidgetItem* item = new QListWidgetItem(QString::number(p->getId())+":"+p->getName());
             ui->m_projectslistWidget->addItem(item);
+            ui->m_putUserOnProjectProjectslistWidget->addItem(new QListWidgetItem(QString::number(p->getId())+":"+p->getName()));
         }
     initTasks();
     initComments();
@@ -507,6 +523,7 @@ void MainWidget::getAllUsersResponse(QNetworkReply *reply)
         UserModel* u = m_tmFactory->createUser(obj[i].toObject());
         //qDebug()<<u->getName();
         m_tmFactory->addUser(u);
+        ui->m_putUserOnProjectUserscomboBox->addItem(u->getEmail());
     }
 
     //selectPage((int)pages::TASK);
@@ -813,6 +830,45 @@ void MainWidget::addCommentResponse(QNetworkReply *reply)
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addCommentResponse(QNetworkReply*)));
     }
 }
+
+void MainWidget::changeStatusResponse(QNetworkReply *reply)
+{
+    QMessageBox::warning(this, "Changed status", "Changed status");
+    QString response= reply->readAll();
+    QJsonObject obj;
+    QJsonDocument doc = QJsonDocument::fromJson(response.toUtf8());
+
+    // check validity of the document
+    if(!doc.isNull())
+    {
+        if(doc.isObject())
+        {
+            obj = doc.object();
+        }
+        else
+        {
+            qDebug() << "Document is not an object" << endl;
+        }
+    }
+    else
+    {
+        qDebug() << "Invalid JSON...\n" << QString(reply->readAll()) << endl;
+    }
+    TaskModel* t= m_tmFactory->createTask(obj);
+    if(t){
+        TaskModel* ct=Session::getInstance()->task();
+        ct->setStatus(t->getStatus());
+        delete t;
+    }
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(changeStatusResponse(QNetworkReply*)));
+}
+
+void MainWidget::putUserOnProjectResponse(QNetworkReply *reply)
+{
+    QMessageBox::warning(this,"Succesfully", "Succesfully put user on project!");
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(putUserOnProjectResponse(QNetworkReply*)));
+    selectPage((int)pages::PROJECT);
+}
 void MainWidget::on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     QStringList projectId = item->text().split(":");
@@ -933,5 +989,44 @@ void MainWidget::on_m_tasklistinprogresWidget_itemEntered(QListWidgetItem *item)
 void MainWidget::on_m_tasklistdoneWidget_itemEntered(QListWidgetItem *item)
 {
     qDebug()<<"item done entered";
+}
+
+void MainWidget::changeStatusSlot(int task_status)
+{
+    tStatus=task_status;
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(changeStatusResponse(QNetworkReply*)));
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QUrlQuery query;
+    int tid= Session::getInstance()->task()->getId();
+    //qDebug()<<QString::number((int)type);
+    QUrl url= QUrl("http://127.0.0.1:8000/changetaskstatus/"+QString::number(tid));
+    QByteArray postData;
+    query.addQueryItem("status",QString::number(task_status));
+    postData=query.toString(QUrl::FullyEncoded).toUtf8();
+    QNetworkRequest networkRequest(url);
+    //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    m_networkManager->post(networkRequest, postData);
+}
+
+void MainWidget::on_m_putUserOnProjectSubmitpushButton_clicked()
+{
+    QStringList projectId = ui->m_putUserOnProjectProjectslistWidget->currentItem()->text().split(":");
+    QString id= projectId[0];
+    QString email= ui->m_putUserOnProjectUserscomboBox->currentText();
+    UserModel* u = m_tmFactory->getUserByEmail(email);
+    QString uId= QString::number(u->getId());
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(putUserOnProjectResponse(QNetworkReply*)));
+    m_networkManager->setCookieJar(new QNetworkCookieJar(m_networkManager));
+    QUrlQuery query;
+    QUrl url= QUrl("http://127.0.0.1:8000/createuseronproject/"+uId+"/"+id);
+    QNetworkRequest networkRequest(url);
+    QByteArray postData;
+    m_networkManager->post(networkRequest, postData);
+}
+
+
+void MainWidget::on_m_projectsPutUserOnProjectpushButton_clicked()
+{
+    selectPage((int)pages::PUTUSERONPROJECT);
 }
 

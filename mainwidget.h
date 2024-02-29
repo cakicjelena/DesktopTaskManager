@@ -23,7 +23,8 @@ enum class pages{
     TASK=7,
     TASKDETAILS=8,
     TASKCREATE=9,
-    COMMENT=10
+    COMMENT=10,
+    PUTUSERONPROJECT=11
 
 };
 
@@ -124,6 +125,10 @@ private slots:
 
     void addCommentResponse(
         QNetworkReply *reply); ///< Slot called when adding comment is finished
+    void changeStatusResponse(
+        QNetworkReply *reply); ///< Slot called when changing status of task is finished
+    void putUserOnProjectResponse(
+        QNetworkReply *reply); ///< Slot called when putting user on project is finished
 
     void on_m_logout_button_clicked();
 
@@ -165,7 +170,11 @@ private slots:
     void on_m_tasklistinprogresWidget_itemEntered(QListWidgetItem *item);
 
     void on_m_tasklistdoneWidget_itemEntered(QListWidgetItem *item);
+    void changeStatusSlot(int task_status);
 
+        void on_m_putUserOnProjectSubmitpushButton_clicked();
+
+    void on_m_projectsPutUserOnProjectpushButton_clicked();
 
 signals:
     void showSideBar();

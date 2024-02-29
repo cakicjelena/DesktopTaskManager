@@ -459,6 +459,13 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QPushButton" name="m_projectsPutUserOnProjectpushButton">
+             <property name="text">
+              <string>PUT USER ON PROJECT</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -875,6 +882,23 @@
        </item>
        <item row="1" column="0">
         <widget class="QPushButton" name="m_commentSubmitpushButton">
+         <property name="text">
+          <string>SUBMIT</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="putUserOnProject">
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QListWidget" name="m_putUserOnProjectProjectslistWidget"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QComboBox" name="m_putUserOnProjectUserscomboBox"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="m_putUserOnProjectSubmitpushButton">
          <property name="text">
           <string>SUBMIT</string>
          </property>
