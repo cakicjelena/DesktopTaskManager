@@ -12,6 +12,7 @@ protected:
      TaskModel* m_task;
 
 public:
+    virtual ~Session();
     static Session* getInstance();
     ProjectModel *project() const;
     void setProject(ProjectModel *newProject);

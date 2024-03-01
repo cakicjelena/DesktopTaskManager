@@ -242,9 +242,17 @@ void MainWidget::projects()
         connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(ProjectResponse(QNetworkReply*)));
         if(u->getIs_superuser()){
             url= QUrl("http://127.0.0.1:8000/getallprojects/");
+            ui->m_editprojectbutton->setVisible(true);
+            ui->m_deleteprojectbutton->setVisible(true);
+            ui->m_createprojectbutton->setVisible(true);
+            ui->m_projectsPutUserOnProjectpushButton->setVisible(true);
         }
         else{
             url=QUrl("http://127.0.0.1:8000/getallprojectsofuser/"+ QString::number(u->getId()));
+            ui->m_editprojectbutton->setVisible(false);
+            ui->m_deleteprojectbutton->setVisible(false);
+            ui->m_createprojectbutton->setVisible(false);
+            ui->m_projectsPutUserOnProjectpushButton->setVisible(false);
         }
 
         QNetworkRequest networkRequest(url);
@@ -414,7 +422,7 @@ void MainWidget::on_m_editprojectbutton_clicked()
     {
         ui->m_projectcreateNameLineEdit->setText(p->getName());
         ui->m_projectCreateDescriptionText->setPlainText(p->getDescription());
-        ui->m_createProjectCreateDateLabel->setText(ui->m_createProjectCreateDateLabel->text() + p->getCreateDate().toString());
+        ui->m_createProjectCreateDateLabel->setText("Create date: " + p->getCreateDate().toString());
         ui->m_projectcreateDateEdit->setDate(p->getDeadlineDate());
         UserModel* u= m_tmFactory->getUserById(p->getProjectManagerId());
         if(u){
@@ -474,7 +482,7 @@ void MainWidget::on_m_createProjectSubmitButton_clicked()
         QUrl url= QUrl("http://127.0.0.1:8000/createproject/");
         QByteArray postData;
 
-        query.addQueryItem("namee", ui->m_projectcreateNameLineEdit->text());
+        query.addQueryItem("name", ui->m_projectcreateNameLineEdit->text());
         query.addQueryItem("description",ui->m_projectCreateDescriptionText->toPlainText());
         query.addQueryItem("createDate",QString::number(QDate::currentDate().year())+"-"+QString::number(QDate::currentDate().month())+"-"+QString::number(QDate::currentDate().day()));
         query.addQueryItem("deadlineDate",QString::number(ui->m_projectcreateDateEdit->date().year())+"-"+QString::number(ui->m_projectcreateDateEdit->date().month())+"-"+QString::number(ui->m_projectcreateDateEdit->date().day()));
@@ -485,7 +493,7 @@ void MainWidget::on_m_createProjectSubmitButton_clicked()
         else{
             query.addQueryItem("projectManagerId", "");
         }
-        qDebug()<<query.allQueryItemValues("namee");
+        qDebug()<<query.allQueryItemValues("name");
         postData=query.toString(QUrl::FullyEncoded).toUtf8();
         QNetworkRequest networkRequest(url);
         //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
@@ -502,9 +510,11 @@ void MainWidget::on_m_taskCreatepushButton_clicked()
 {
     m_networkManager->setCookieJar(new QNetworkCookieJar);
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(createTaskResponse(QNetworkReply*)));
+
     if(ui->m_taskCreateNameLineEdit_2->text()!="" && ui->m_taskCreateDescriptionTextEdit_2->toPlainText()!="" && ui->m_taskCreateFinishdateEdit_2->date()>QDate::currentDate()){
         QUrlQuery query;
-        QUrl url= QUrl("http://127.0.0.1:8000/createtask/"+QString::number(Session::getInstance()->project()->getId())+"/"+QString::number(Session::getInstance()->user()->getId()));
+        UserModel* u= m_tmFactory->getUserByEmail(ui->m_taskCreateUsercomboBox->currentText());
+        QUrl url= QUrl("http://127.0.0.1:8000/createtask/"+QString::number(Session::getInstance()->project()->getId())+"/"+QString::number(u->getId()));
         QByteArray postData;
 
         query.addQueryItem("name", ui->m_taskCreateNameLineEdit_2->text());
@@ -536,7 +546,18 @@ void MainWidget::on_m_projectslistWidget_itemDoubleClicked(QListWidgetItem *item
         Session::getInstance()->setProject(p);
     }
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(TaskResponse(QNetworkReply*)));
-    QUrl url= QUrl("http://127.0.0.1:8000/getalltasksofproject/"+projectId[0]);
+    UserModel* u= Session::getInstance()->user();
+    QUrl url;
+    if(u->getIs_superuser()){
+        url= QUrl("http://127.0.0.1:8000/getalltasksofproject/"+projectId[0]);
+        ui->m_createtaskbutton->setVisible(true);
+        ui->m_deletetaskbutton->setVisible(true);
+    }
+    else {
+        url=QUrl("http://127.0.0.1:8000/getalltasksofuser/"+QString::number(u->getId()));
+        ui->m_createtaskbutton->setVisible(false);
+        ui->m_deletetaskbutton->setVisible(false);
+    }
     QNetworkRequest networkRequest(url);
     //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
     //networkRequest.setRawHeader("X-CSRFToken", getCsrftoken());
@@ -558,10 +579,10 @@ void MainWidget::on_m_taskdetailsSubmitpushButton_clicked()
     query.addQueryItem("finishDate",QString::number(ui->m_taskdetailsFinishdateEdit->date().year())+"-"+QString::number(ui->m_taskdetailsFinishdateEdit->date().month())+"-"+QString::number(ui->m_taskdetailsFinishdateEdit->date().day()));
     UserModel* u= m_tmFactory->getUserByEmail(ui->m_taskdetailsUsercomboBox->currentText());
     if(u){
-        query.addQueryItem("userId",QString::number( u->getId()));
+        query.addQueryItem("user",QString::number( u->getId()));
     }
     else{
-        query.addQueryItem("userId", "");
+        query.addQueryItem("user", "");
     }
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
@@ -627,7 +648,7 @@ void MainWidget::on_m_commentSubmitpushButton_clicked()
     int uid=Session::getInstance()->user()->getId();
     QUrl url= QUrl("http://127.0.0.1:8000/createcommentontask/"+QString::number(uid)+"/"+QString::number(tid));
     QByteArray postData;
-    query.addQueryItem("comment_on_task", ui->m_commentplainTextEdit->toPlainText());
+    query.addQueryItem("comment", ui->m_commentplainTextEdit->toPlainText());
     postData=query.toString(QUrl::FullyEncoded).toUtf8();
     QNetworkRequest networkRequest(url);
     //networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=<calculated when request is sent>");
@@ -1032,6 +1053,7 @@ void MainWidget::addCommentResponse(QNetworkReply *reply)
         m_tmFactory->addComment(c);
         qDebug()<<c->getComment();
         ui->m_taskdetailsCommentslistWidget->addItem(new QListWidgetItem(c->getEmail()+":"+c->getComment()));
+        Session::getInstance()->task()->getComments().append(c);
         selectPage((int)pages::TASKDETAILS);
         disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(addCommentResponse(QNetworkReply*)));
     }

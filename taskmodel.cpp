@@ -2,6 +2,8 @@
 #include "QJsonObject"
 #include "QJsonArray"
 #include "commentmodel.h"
+#include "projectmodel.h"
+#include "usermodel.h"
 int TaskModel::getId() const
 {
     return id;
@@ -113,8 +115,8 @@ TaskModel::TaskModel(QJsonObject& obj)
     status= obj.take("status").toInt();
     startDate= QDate::fromString(obj.take("startDate").toString(), "yyyy-MM-dd");
     finishDate=QDate::fromString(obj.take("finishDate").toString(), "yyyy-MM-dd");
-    projectId= obj.take("projectId").toInt();
-    userId= obj.take("userId").toInt();
+    projectId= obj.take("project").toInt();
+    userId= obj.take("user").toInt();
     QJsonArray comments= obj.take("comments").toArray();
     if(!comments.isEmpty()){
         for (int i = 0; i < comments.size(); ++i) {

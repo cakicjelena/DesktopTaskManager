@@ -52,6 +52,7 @@ void TaskList::listItemDoubleClicked(QListWidgetItem *item)
 void TaskList::itemDrag(QListWidgetItem *item)
 {
     qDebug()<<"Reaguje";
+    emit customItemClicked(item);
     //setItemHidden(item,true);
 }
 

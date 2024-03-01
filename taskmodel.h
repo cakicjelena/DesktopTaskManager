@@ -4,6 +4,9 @@
 class QString;
 class QJsonObject;
 class CommentModel;
+class UserModel;
+class ProjectModel;
+
 class TaskModel
 {
 protected:
@@ -17,6 +20,9 @@ protected:
     int projectId; ///< id of project where task is
     int userId; ///< id of user who works on task
     QVector<CommentModel*> m_comments; ///< List of comments
+    //UserModel* user; ///< Pointer to user object
+    //ProjectModel* project; ///< Pointer to project object
+
 public:
     TaskModel();
     virtual ~TaskModel();

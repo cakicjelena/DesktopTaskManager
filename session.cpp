@@ -23,6 +23,13 @@ void Session::setTask(TaskModel *newTask)
     m_task = newTask;
 }
 
+Session::~Session()
+{
+    if(m_instance){
+        delete m_instance;
+    }
+}
+
 Session *Session::getInstance()
 {
     if(!m_instance){
