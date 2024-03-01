@@ -194,14 +194,13 @@ CommentModel *TMFactory::getCommentById(int id)
 
 QVector<CommentModel*> TMFactory::getAllCommentsOfTask(int taskId)
 {
-    QVector<CommentModel*> result;
-    foreach (CommentModel* c, m_commentsList) {
-        if(c->getTaskId()==taskId){
-            result.append(c);
-        }
-
+    TaskModel* t=getTaskById(taskId);
+    if(t){
+        return t->getComments();
     }
-    return result;
+    else{
+        return QVector<CommentModel*>();
+    }
 }
 
 void TMFactory::addComment(CommentModel *c)

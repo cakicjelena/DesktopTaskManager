@@ -1,5 +1,7 @@
 #include "taskmodel.h"
 #include "QJsonObject"
+#include "QJsonArray"
+#include "commentmodel.h"
 int TaskModel::getId() const
 {
     return id;
@@ -85,6 +87,16 @@ void TaskModel::setUserId(int newUserId)
     userId = newUserId;
 }
 
+QVector<CommentModel *> TaskModel::getComments() const
+{
+    return m_comments;
+}
+
+void TaskModel::setComments(const QVector<CommentModel *> &newComments)
+{
+    m_comments = newComments;
+}
+
 TaskModel::TaskModel() {}
 
 TaskModel::~TaskModel()
@@ -103,9 +115,19 @@ TaskModel::TaskModel(QJsonObject& obj)
     finishDate=QDate::fromString(obj.take("finishDate").toString(), "yyyy-MM-dd");
     projectId= obj.take("projectId").toInt();
     userId= obj.take("userId").toInt();
+    QJsonArray comments= obj.take("comments").toArray();
+    if(!comments.isEmpty()){
+        for (int i = 0; i < comments.size(); ++i) {
+            QJsonObject obj = comments[i].toObject();
+            m_comments.append(new CommentModel(obj));
+        }
+    }
+    else{
+        qDebug()<<"Invalid json array";
+    }
 }
 
-TaskModel::TaskModel(int id, QString name, int type, QString description, int status, QDate startDate, QDate finishDate, int projectId, int userId)
+TaskModel::TaskModel(int id, QString name, int type, QString description, int status, QDate startDate, QDate finishDate, int projectId, int userId, QVector<CommentModel*> m_comments)
 {
     id=id;
     name=name;
@@ -116,4 +138,5 @@ TaskModel::TaskModel(int id, QString name, int type, QString description, int st
     finishDate=finishDate;
     projectId=projectId;
     userId=userId;
+    m_comments=m_comments;
 }

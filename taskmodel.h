@@ -3,6 +3,7 @@
 #include "QDate"
 class QString;
 class QJsonObject;
+class CommentModel;
 class TaskModel
 {
 protected:
@@ -15,11 +16,12 @@ protected:
     QDate finishDate; ///< finish date of task
     int projectId; ///< id of project where task is
     int userId; ///< id of user who works on task
+    QVector<CommentModel*> m_comments; ///< List of comments
 public:
     TaskModel();
     virtual ~TaskModel();
     TaskModel(QJsonObject& obj);
-    TaskModel(int id, QString name, int type, QString description, int status, QDate startDate, QDate finishDate, int projectId, int userId);
+    TaskModel(int id, QString name, int type, QString description, int status, QDate startDate, QDate finishDate, int projectId, int userId, QVector<CommentModel*> m_comments );
     int getId() const;
     QString getName() const;
     void setName(const QString &newName);
@@ -37,6 +39,8 @@ public:
     void setProjectId(int newProjectId);
     int getUserId() const;
     void setUserId(int newUserId);
+    QVector<CommentModel *> getComments() const;
+    void setComments(const QVector<CommentModel *> &newComments);
 };
 
 #endif // TASKMODEL_H
