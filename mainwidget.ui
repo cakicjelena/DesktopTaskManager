@@ -17,7 +17,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="main">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -178,7 +178,7 @@
             </size>
            </property>
            <property name="title">
-            <string>Sex:</string>
+            <string>Gender:</string>
            </property>
            <widget class="QRadioButton" name="m_maleRadioButton">
             <property name="geometry">
@@ -298,7 +298,7 @@
          <item>
           <widget class="QLabel" name="m_sexLabel">
            <property name="text">
-            <string>Sex:</string>
+            <string>Gender:</string>
            </property>
           </widget>
          </item>
